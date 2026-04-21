@@ -1,0 +1,48 @@
+[
+  {
+    "timestamp": "2026-04-18T09:23:31.768282",
+    "version": "V23.3",
+    "test_type": "real_sensor_5min",
+    "duration_seconds": 300,
+    "dt": 0.05,
+    "total_steps": 6000,
+    "total_gps_updates": 2399,
+    "true_final_position": [
+      7319.023999999779,
+      5913.299749999859
+    ],
+    "spike_final_position": [
+      7292.332204487473,
+      5868.769074335756
+    ],
+    "baseline_final_position": [
+      6635.9402973532515,
+      5328.172210609173
+    ],
+    "final_errors": {
+      "spike_error_m": 51.917559869203295,
+      "baseline_error_m": 899.4318107420313,
+      "error_reduction_percent": 94.22773808429443
+    },
+    "average_errors": {
+      "spike_avg_error_m": 40.7122872935165,
+      "baseline_avg_error_m": 517.4297512115173,
+      "improvement_percent": 92.13182326717933
+    },
+    "maximum_errors": {
+      "spike_max_error_m": 54.13242112926347,
+      "baseline_max_error_m": 899.4318107420313
+    },
+    "performance_metrics": {
+      "total_spikes": 2380,
+      "avg_spike_rate_per_sec": 7.933333333333334,
+      "total_distance_m": 11149.783268788093,
+      "avg_speed_ms": 37.16594422929364,
+      "cloud_updates": 5
+    },
+    "edge_cloud_hybrid": true,
+    "final_cloud_bias": [
+      -0.04257032571747625,
+      0.023814359265557528
+    ],
+    "meets_50pct_target": 
