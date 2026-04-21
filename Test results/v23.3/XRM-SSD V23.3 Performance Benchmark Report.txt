@@ -74,7 +74,7 @@ The system shows diminishing returns beyond batch size 8, suggesting optimal uti
 
 6. Production Recommendations
 Use Case	Recommended Batch Size	Expected P95 Latency	Expected Throughput
-Real-time / Interactive (<15 ms)	      1	  12.0 ms	         136 TPS
+Real-time / Interactive (<15 ms)	    1	  12.0 ms	         136 TPS
 Balanced (throughput + latency)	        4	  32.3 ms	         182 TPS
 Maximum Throughput (batch processing)  	8	  64.7 ms	         195 TPS
 Avoid (inefficient)	                  16+	  >130 ms	        <182 TPS
@@ -86,10 +86,10 @@ For latency-sensitive applications, batch size 1 provides sub-8 ms P95 latency w
 No stability issues were observed across all tested configurations. The system is production-ready for both real-time and batch inference workloads.
 
 8. Appendix: Raw Data
-Metric	          Batch 1	 Batch 4	Batch 8 	Batch 16
-Avg Latency (ms)	7.357	   21.924	  41.051   	88.186
-P95 Latency (ms)	12.035	 32.343 	64.657	  130.277
-Throughput (TPS)	135.93	 182.45 	194.88	  181.43
+Metric	           Batch 1	 Batch 4	Batch 8    Batch 16
+Avg Latency (ms)	7.357	 21.924	    41.051      88.186
+P95 Latency (ms)	12.035	 32.343 	64.657	   130.277
+Throughput (TPS)	135.93	 182.45 	194.88	   181.43
 
 
 Report generated on: April 21, 2026
