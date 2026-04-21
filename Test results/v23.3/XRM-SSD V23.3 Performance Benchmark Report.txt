@@ -18,10 +18,10 @@ Warm-up Iterations	80
 Measured Iterations	80 per batch size
 3. Performance Results
 Batch Size	Avg Latency (ms)	P95 Latency (ms)	Throughput (TPS)
-1	        7.357	                12.035           	135.93
+1	        7.357	              12.035              135.93
 4	        21.924	              32.343	          182.45
 8	        41.051	              64.657	          194.88
-16	      88.186	             130.277          	181.43
+16	        88.186	             130.277              181.43
 
 4. Performance Curves (Textual Visualization)
 Throughput vs. Batch Size
