@@ -1,0 +1,51 @@
+[
+  {
+    "timestamp": "2026-04-18T09:28:13.263584",
+    "version": "V23.3",
+    "test_type": "real_sensor_5min",
+    "duration_seconds": 300.0,
+    "dt": 0.05,
+    "total_steps": 599,
+    "total_gps_updates": 896,
+    "true_final_position": [
+      7319.032999999781,
+      5891.467999999862
+    ],
+    "spike_final_position": [
+      7293.981282930744,
+      5848.591793793109
+    ],
+    "baseline_final_position": [
+      6624.7696910517325,
+      5348.993910486613
+    ],
+    "final_errors": {
+      "spike_error_m": 49.658409023961546,
+      "baseline_error_m": 881.0673526721565,
+      "error_reduction_percent": 94.36383508328228
+    },
+    "average_errors": {
+      "spike_avg_error_m": 39.95042725940778,
+      "baseline_avg_error_m": 514.1469687438334,
+      "improvement_percent": 92.229765088956
+    },
+    "maximum_errors": {
+      "spike_max_error_m": 53.80359979632675,
+      "baseline_max_error_m": 881.0673526721565
+    },
+    "performance_metrics": {
+      "total_spikes": 874,
+      "avg_spike_rate_per_sec": 2.9133333333333336,
+      "total_distance_m": 11125.346893100206,
+      "avg_speed_ms": 37.084489643667354,
+      "cloud_updates": 5
+    },
+    "edge_cloud_hybrid": true,
+    "final_cloud_bias": [
+      -0.047077835484210746,
+      0.02219005398773714
+    ],
+    "meets_50pct_target": true,
+    "notes": "5\u5206\u9418\u771f\u5be6\u611f\u6e2c\u5668\u5be6\u6e2c - \u5305\u542b\u52a0\u901f\u3001\u5de1\u822a\u3001\u8f49\u5f4e\u3001\u6e1b\u901f\u7b49\u771f\u5be6\u5834\u666f"
+  }
+]
