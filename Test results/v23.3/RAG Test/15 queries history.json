@@ -1,0 +1,110 @@
+{
+  "runs": [
+    {
+      "query_id": 1,
+      "si": 0.92327,
+      "ttft_ms": 3.4,
+      "sparse_rate": 0.0,
+      "latency_ms": 6.89
+    },
+    {
+      "query_id": 2,
+      "si": 0.9227,
+      "ttft_ms": 3.4,
+      "sparse_rate": 0.5,
+      "latency_ms": 4.69
+    },
+    {
+      "query_id": 3,
+      "si": 0.91553,
+      "ttft_ms": 3.4,
+      "sparse_rate": 0.3333,
+      "latency_ms": 4.65
+    },
+    {
+      "query_id": 4,
+      "si": 0.91061,
+      "ttft_ms": 3.4,
+      "sparse_rate": 0.25,
+      "latency_ms": 4.41
+    },
+    {
+      "query_id": 5,
+      "si": 0.9127,
+      "ttft_ms": 3.4,
+      "sparse_rate": 0.2,
+      "latency_ms": 4.45
+    },
+    {
+      "query_id": 6,
+      "si": 0.91132,
+      "ttft_ms": 3.4,
+      "sparse_rate": 0.1667,
+      "latency_ms": 4.51
+    },
+    {
+      "query_id": 7,
+      "si": 0.90104,
+      "ttft_ms": 3.4,
+      "sparse_rate": 0.1429,
+      "latency_ms": 5.1
+    },
+    {
+      "query_id": 8,
+      "si": 0.92446,
+      "ttft_ms": 3.4,
+      "sparse_rate": 0.125,
+      "latency_ms": 4.61
+    },
+    {
+      "query_id": 9,
+      "si": 0.91404,
+      "ttft_ms": 3.4,
+      "sparse_rate": 0.1111,
+      "latency_ms": 4.46
+    },
+    {
+      "query_id": 10,
+      "si": 0.92972,
+      "ttft_ms": 3.4,
+      "sparse_rate": 0.1,
+      "latency_ms": 4.59
+    },
+    {
+      "query_id": 11,
+      "si": 0.90946,
+      "ttft_ms": 3.4,
+      "sparse_rate": 0.0909,
+      "latency_ms": 4.45
+    },
+    {
+      "query_id": 12,
+      "si": 0.90786,
+      "ttft_ms": 3.4,
+      "sparse_rate": 0.0833,
+      "latency_ms": 4.59
+    },
+    {
+      "query_id": 13,
+      "si": 0.9245,
+      "ttft_ms": 3.4,
+      "sparse_rate": 0.0769,
+      "latency_ms": 4.58
+    },
+    {
+      "query_id": 14,
+      "si": 0.91843,
+      "ttft_ms": 3.4,
+      "sparse_rate": 0.1429,
+      "latency_ms": 4.8
+    },
+    {
+      "query_id": 15,
+      "si": 0.91424,
+      "ttft_ms": 3.4,
+      "sparse_rate": 0.1333,
+      "latency_ms": 4.66
+    }
+  ],
+  "last_updated": "2026-04-17T12:47:20.137292"
+}
