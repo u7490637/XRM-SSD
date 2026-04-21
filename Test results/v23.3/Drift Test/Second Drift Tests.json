@@ -1,0 +1,44 @@
+[
+  {
+    "timestamp": "2026-04-18T09:16:51.458267",
+    "version": "V23.3 REAL TEST",
+    "test_type": "real_sensor_drift",
+    "duration_seconds": 599.9931795597076,
+    "dt_avg": 0.010800373040929368,
+    "final_position_m": [
+      2994.579764754611,
+      299.8914466654559
+    ],
+    "total_distance_m": 3009.558580134449,
+    "total_spikes": 47554,
+    "avg_spike_rate_per_sec": 0.856008784562212,
+    "edge_cloud_hybrid": true,
+    "final_cloud_bias": [
+      0.0016057048327662515,
+      -0.002015951709064028
+    ],
+    "sensor_type": "Real IMU + GPS",
+    "notes": "\u771f\u5be6\u611f\u6e2c\u5668\u5be6\u6e2c - V23.3 Spike Coding with Edge-Cloud\u6df7\u5408\u67b6\u69cb"
+  },
+  {
+    "timestamp": "2026-04-18T10:19:48.838356",
+    "version": "V23.3 REAL TEST",
+    "test_type": "real_sensor_drift",
+    "duration_seconds": 599.9961082935333,
+    "dt_avg": 0.010802373450497196,
+    "final_position_m": [
+      2994.6086544493864,
+      299.2877976671398
+    ],
+    "total_distance_m": 3009.527235154321,
+    "total_spikes": 47469,
+    "avg_spike_rate_per_sec": 0.8546325303374023,
+    "edge_cloud_hybrid": true,
+    "final_cloud_bias": [
+      -9.071446954661989e-05,
+      0.001448669988642927
+    ],
+    "sensor_type": "Real IMU + GPS",
+    "notes": "\u771f\u5be6\u611f\u6e2c\u5668\u5be6\u6e2c - V23.3 Spike Coding with Edge-Cloud\u6df7\u5408\u67b6\u69cb"
+  }
+]
