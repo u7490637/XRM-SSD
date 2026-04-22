@@ -1,0 +1,33 @@
+[package]
+name = "xrm_mind_port"
+version = "0.2.0"
+edition = "2021"
+authors = ["STARGA, Inc. <ceo@star.ga>"]
+description = "XRM-SSD + MIND hybrid bench harness"
+
+[dependencies]
+sha2 = "0.10"
+rand = "0.8"
+rand_chacha = "0.3"
+
+# Default build enables the runtime protection layer (anti-debug,
+# anti-injection, undumpable, PTRACE_TRACEME self-trap, self-hash).
+# `--no-default-features` turns the whole protection module into a no-op,
+# which is useful for local `perf record` / `strace` / `gdb` debugging.
+[features]
+default = ["protected"]
+protected = []
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+strip = "symbols"
+panic = "abort"
+debug = false
+overflow-checks = false
+incremental = false
+
+[[bin]]
+name = "xrm_mind_port"
+path = "src/main.rs"

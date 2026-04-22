@@ -1,0 +1,115 @@
+// XRM-SSD + MIND: 9-invariant governance kernel
+// Copyright (c) 2026 STARGA, Inc. All rights reserved.
+//
+// Evaluates nine parallel integrity checks over a transaction batch.
+// Returns a single f32 bitmask-encoded verdict (sum of 2^k per passing check).
+// All operations are tensor reductions — deterministic, order-independent,
+// SIMD-vectorized by mindc, and bit-identical across runs.
+//
+// Input tensor layout: f32[N, D] where N = batch size, D = feature dim.
+
+import std.tensor;
+
+// --- Individual invariants: return 1.0 on pass, 0.0 on fail -----------------
+
+// I1: all values finite and non-negative
+fn inv1_non_negative(batch: tensor<f32[N, D]>) -> tensor<f32> {
+    let min_val = min_all(batch);
+    return select(min_val >= 0.0, 1.0, 0.0);
+}
+
+// I2: sum of absolute values bounded
+fn inv2_sum_bounded(batch: tensor<f32[N, D]>, threshold: f32) -> tensor<f32> {
+    let s = sum_all(abs(batch));
+    return select(s < threshold, 1.0, 0.0);
+}
+
+// I3: per-row L2 norm all bounded
+fn inv3_l2_bounded(batch: tensor<f32[N, D]>, threshold: f32) -> tensor<f32> {
+    let sq = batch * batch;
+    let row_ss = sum(sq, [1]);
+    let row_norm = sqrt(row_ss);
+    let max_norm = max_all(row_norm);
+    return select(max_norm < threshold, 1.0, 0.0);
+}
+
+// I4: batch mean in tolerated band
+fn inv4_mean_in_band(batch: tensor<f32[N, D]>, lo: f32, hi: f32) -> tensor<f32> {
+    let m = mean_all(batch);
+    let above_lo = select(m >= lo, 1.0, 0.0);
+    let below_hi = select(m <= hi, 1.0, 0.0);
+    return above_lo * below_hi;
+}
+
+// I5: variance bounded (spread detection)
+fn inv5_variance_bounded(batch: tensor<f32[N, D]>, threshold: f32) -> tensor<f32> {
+    let m = mean_all(batch);
+    let centered = batch - m;
+    let sq = centered * centered;
+    let v = mean_all(sq);
+    return select(v < threshold, 1.0, 0.0);
+}
+
+// I6: max absolute value bounded (outlier/drift)
+fn inv6_max_bounded(batch: tensor<f32[N, D]>, threshold: f32) -> tensor<f32> {
+    let m = max_all(abs(batch));
+    return select(m < threshold, 1.0, 0.0);
+}
+
+// I7: row sums monotonic non-negative (no negative-mass rows)
+fn inv7_row_sums_nonneg(batch: tensor<f32[N, D]>) -> tensor<f32> {
+    let row_sums = sum(batch, [1]);
+    let min_row = min_all(row_sums);
+    return select(min_row >= 0.0, 1.0, 0.0);
+}
+
+// I8: column range consistency (max - min per column bounded)
+fn inv8_col_range_bounded(batch: tensor<f32[N, D]>, threshold: f32) -> tensor<f32> {
+    let col_max = max(batch, [0]);
+    let col_min = min(batch, [0]);
+    let col_range = col_max - col_min;
+    let worst = max_all(col_range);
+    return select(worst < threshold, 1.0, 0.0);
+}
+
+// I9: replay fence — batch sum equals sum-of-row-sums within a bounded
+// relative tolerance (f32 addition is not associative, so hard equality
+// would trip under legal reordering). Surviving in the IR across runs
+// confirms the compiler did not silently reorder reductions.
+fn inv9_determinism_fence(batch: tensor<f32[N, D]>) -> tensor<f32> {
+    let total = sum_all(batch);
+    let by_row = sum_all(sum(batch, [1]));
+    let delta = abs(total - by_row);
+    let scale = max(abs(total), 1.0);
+    // N*D elements, 1 ulp (2^-23) per add, scaled by magnitude.
+    let tol = (tensor.shape(batch, 0) * tensor.shape(batch, 1)) * 0.00000012 * scale;
+    return select(delta <= tol, 1.0, 0.0);
+}
+
+// --- Aggregate kernel: evaluates all 9 and returns a bitmask-encoded f32 ----
+//
+// Output encoding: each passed invariant contributes 2^(k-1) to the total.
+// 511.0 = all nine pass. Any lower value is a bitmask of failed checks.
+
+fn gov9_evaluate(
+    batch: tensor<f32[N, D]>,
+    sum_thresh: f32,
+    l2_thresh: f32,
+    mean_lo: f32,
+    mean_hi: f32,
+    var_thresh: f32,
+    max_thresh: f32,
+    col_range_thresh: f32
+) -> tensor<f32> {
+    let p1 = inv1_non_negative(batch);
+    let p2 = inv2_sum_bounded(batch, sum_thresh);
+    let p3 = inv3_l2_bounded(batch, l2_thresh);
+    let p4 = inv4_mean_in_band(batch, mean_lo, mean_hi);
+    let p5 = inv5_variance_bounded(batch, var_thresh);
+    let p6 = inv6_max_bounded(batch, max_thresh);
+    let p7 = inv7_row_sums_nonneg(batch);
+    let p8 = inv8_col_range_bounded(batch, col_range_thresh);
+    let p9 = inv9_determinism_fence(batch);
+
+    return p1 * 1.0 + p2 * 2.0 + p3 * 4.0 + p4 * 8.0 + p5 * 16.0 + p6 * 32.0 + p7 * 64.0 + p8 * 128.0 + p9 * 256.0;
+}

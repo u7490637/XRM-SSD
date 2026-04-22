@@ -1,0 +1,18 @@
+/* libmind_cpu_linux-x64.so version script
+ *
+ * Forces the only externally-visible symbol to be mind_main.
+ * Everything else in the MIND runtime (tensor ops, compiler helpers,
+ * internal state) is marked LOCAL and cannot be looked up via dlsym.
+ *
+ * Applied at final link via:
+ *    -Wl,--version-script=exports.map
+ *
+ * Or, post-hoc, by rewriting the symbol table with objcopy --keep-symbol.
+ */
+
+MIND_CPU_1.0 {
+    global:
+        mind_main;
+    local:
+        *;
+};

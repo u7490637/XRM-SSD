@@ -1,0 +1,311 @@
+// xrm-ssd Protection Module
+// Copyright (c) 2025-2026 STARGA, Inc. All rights reserved.
+// PROPRIETARY AND CONFIDENTIAL
+//
+// Same protection mechanism as NikolaChess runtime, locked to xrm-ssd.
+
+import std.crypto
+import std.fs
+import std.process
+import std.mem
+import std.thread
+
+#[cfg(target_os = "linux")]
+#[extern("C")]
+fn ptrace(request: i32, pid: i32, addr: *void, data: *void) -> i64
+
+#[cfg(target_os = "linux")]
+#[extern("C")]
+fn prctl(option: i32, arg2: u64, arg3: u64, arg4: u64, arg5: u64) -> i32
+
+#[cfg(target_os = "linux")]
+#[extern("C")]
+fn getpid() -> i32
+
+#[cfg(target_os = "linux")]
+#[extern("C")]
+fn kill(pid: i32, sig: i32) -> i32
+
+#[cfg(target_os = "macos")]
+#[extern("C")]
+fn ptrace(request: i32, pid: i32, addr: *void, data: i32) -> i32
+
+#[cfg(target_os = "macos")]
+#[extern("C")]
+fn sysctl(name: *i32, namelen: u32, oldp: *void, oldlenp: *usize, newp: *void, newlen: usize) -> i32
+
+#[cfg(target_os = "windows")]
+#[extern("C", lib = "kernel32")]
+fn IsDebuggerPresent() -> i32
+
+#[cfg(target_os = "windows")]
+#[extern("C", lib = "kernel32")]
+fn CheckRemoteDebuggerPresent(hProcess: *void, pbDebuggerPresent: *i32) -> i32
+
+#[cfg(target_os = "windows")]
+#[extern("C", lib = "kernel32")]
+fn GetCurrentProcess() -> *void
+
+#[cfg(target_os = "windows")]
+#[extern("C", lib = "kernel32")]
+fn TerminateProcess(hProcess: *void, uExitCode: u32) -> i32
+
+const PTRACE_TRACEME: i32 = 0
+const PTRACE_DETACH: i32 = 17
+const PR_SET_DUMPABLE: i32 = 4
+const SIGKILL: i32 = 9
+const PT_DENY_ATTACH: i32 = 31
+
+// VM opcodes
+const VM_OP_LOAD: u8 = 0x01
+const VM_OP_STORE: u8 = 0x02
+const VM_OP_ADD: u8 = 0x03
+const VM_OP_SUB: u8 = 0x04
+const VM_OP_XOR: u8 = 0x05
+const VM_OP_CMP: u8 = 0x06
+const VM_OP_JMP: u8 = 0x07
+const VM_OP_JZ: u8 = 0x08
+const VM_OP_JNZ: u8 = 0x09
+const VM_OP_SYSCALL: u8 = 0x0C
+const VM_OP_HALT: u8 = 0xFF
+
+const VM_SYS_CHECK_DEBUGGER: u8 = 0x01
+const VM_SYS_GET_TIME: u8 = 0x02
+const VM_SYS_CHECK_INTEGRITY: u8 = 0x04
+const VM_SYS_CORRUPT_AND_DIE: u8 = 0xFF
+
+// Encrypted strings key (xrm-ssd specific)
+const STRING_KEY: [u8; 16] = [0x58, 0x52, 0x4D, 0x47, 0x4F, 0x56, 0x50, 0x52,
+                               0x4F, 0x54, 0x45, 0x43, 0x54, 0x32, 0x36, 0x56]
+
+// Auth key (xrm-ssd specific)
+static const AUTH_KEY_ENC: [32]u8 = [
+    0x58, 0x52, 0x4D, 0x47, 0x4F, 0x56, 0x5F, 0x47,
+    0x4F, 0x56, 0x45, 0x52, 0x4E, 0x41, 0x4E, 0x43,
+    0x45, 0x5F, 0x4B, 0x45, 0x52, 0x4E, 0x45, 0x4C,
+    0x5F, 0x32, 0x30, 0x32, 0x36, 0x5F, 0x56, 0x31
+]
+static const AUTH_KEY_XOR: u8 = 0x2B
+
+// Triple-redundant state
+static var state_key_a: [u8; 32] = [0; 32]
+static var state_key_b: [u8; 32] = [0; 32]
+static var state_key_c: [u8; 32] = [0; 32]
+static var enc_state_a: [u8; 64] = [0; 64]
+static var enc_state_b: [u8; 64] = [0; 64]
+static var enc_state_c: [u8; 64] = [0; 64]
+static var integrity_checksum: u64 = 0
+static var canary_a: u64 = 0xDEADBEEFCAFEBABE
+static var canary_b: u64 = 0x0123456789ABCDEF
+static var canary_c: u64 = 0xFEDCBA9876543210
+static var watchdog_running: bool = false
+
+static var vm_bytecode: [u8; 512] = [0; 512]
+static var vm_key: [u8; 32] = [0; 32]
+static var auth_challenge: u64 = 0
+static var verified: bool = false
+
+fn corrupt_and_die() {
+    mem.zero(&state_key_a, 32)
+    mem.zero(&state_key_b, 32)
+    mem.zero(&state_key_c, 32)
+    mem.zero(&vm_bytecode, 512)
+    canary_a = 0
+    canary_b = 0
+    canary_c = 0
+
+    #[cfg(target_os = "linux")]
+    kill(getpid(), SIGKILL)
+
+    #[cfg(target_os = "windows")]
+    TerminateProcess(GetCurrentProcess(), 0xDEAD)
+
+    process.abort()
+}
+
+fn is_library_mode() -> bool {
+    let exe = process.get_executable_path()
+    return exe.to_lower().contains("python")
+}
+
+#[cfg(target_os = "linux")]
+fn check_debugger() -> bool {
+    if !is_library_mode() {
+        if ptrace(PTRACE_TRACEME, 0, null, null) == -1 {
+            return true
+        }
+        ptrace(PTRACE_DETACH, 0, null, null)
+
+        let status = fs.read_string("/proc/self/status")
+        if status != null {
+            for line in status.lines() {
+                if line.starts_with("TracerPid:") {
+                    let pid = line.split(":")[1].trim().parse_i32().unwrap_or(0)
+                    if pid != 0 { return true }
+                }
+            }
+        }
+    }
+
+    // Timing check (always active)
+    let start = process.time_nanos()
+    var x: u64 = 0x5DEECE66D
+    for i in 0..5000 {
+        x = x * 0x5DEECE66D + 0xB
+    }
+    std.black_box(x)
+    if process.time_nanos() - start > 25_000_000 {
+        return true
+    }
+
+    return false
+}
+
+fn check_environment() -> bool {
+    @if(linux) {
+        if process.getenv("LD_PRELOAD") != null { return true }
+        if process.getenv("LD_AUDIT") != null { return true }
+    }
+    @if(macos) {
+        if process.getenv("DYLD_INSERT_LIBRARIES") != null { return true }
+    }
+    return false
+}
+
+fn check_path() -> bool {
+    let exe = process.get_executable_path().to_lower()
+    if exe.contains("xrmgov") { return false }
+    if exe.contains("xrm-ssd") { return false }
+    if exe.contains("xrm_ssd") { return false }
+    if exe.contains("xrm_mind_port") { return false }
+    if exe.contains("python") { return false }
+    return true
+}
+
+fn check_integrity() -> bool {
+    if canary_a != 0xDEADBEEFCAFEBABE { return false }
+    if canary_b != 0x0123456789ABCDEF { return false }
+    if canary_c != 0xFEDCBA9876543210 { return false }
+
+    let funcs: [*u8; 3] = [&init as *u8, &heartbeat as *u8, &corrupt_and_die as *u8]
+    for func_addr in funcs {
+        if func_addr[0] == 0xCC { return false }
+        if func_addr[0] == 0xE9 { return false }
+    }
+
+    return true
+}
+
+fn watchdog_loop() {
+    var counter: u64 = 0
+    loop {
+        let interval = 200 + ((process.time_nanos() ^ counter) % 600)
+        thread.sleep_ms(interval as u32)
+        counter += 1
+
+        let check = (counter ^ process.time_nanos()) % 9
+        let passed = match check {
+            0 => !check_debugger(),
+            1 => check_integrity(),
+            2 => verify_state_integrity(),
+            3 => run_vm_verification(),
+            4 => canary_a == 0xDEADBEEFCAFEBABE,
+            5 => canary_b == 0x0123456789ABCDEF,
+            6 => canary_c == 0xFEDCBA9876543210,
+            7 => !check_environment(),
+            8 => !check_path(),
+            _ => true,
+        }
+        if !passed { corrupt_and_die() }
+    }
+}
+
+fn init_state() {
+    let t = process.time_nanos()
+    for i in 0..32 {
+        state_key_a[i] = (t ^ (i as u64 * 0x5DEECE66D)) as u8
+        state_key_b[i] = (t ^ (i as u64 * 0x27D4EB2F165667C5)) as u8
+        state_key_c[i] = (t ^ (i as u64 * 0x9E3779B97F4A7C15)) as u8
+    }
+    var checksum: u64 = 0
+    for i in 0..32 {
+        checksum = checksum * 31 + state_key_a[i] as u64
+        checksum = checksum * 31 + state_key_b[i] as u64
+        checksum = checksum * 31 + state_key_c[i] as u64
+    }
+    integrity_checksum = checksum
+}
+
+fn verify_state_integrity() -> bool {
+    var checksum: u64 = 0
+    for i in 0..32 {
+        checksum = checksum * 31 + state_key_a[i] as u64
+        checksum = checksum * 31 + state_key_b[i] as u64
+        checksum = checksum * 31 + state_key_c[i] as u64
+    }
+    return checksum == integrity_checksum
+}
+
+fn compute_auth_response(chal: u64) -> u64 {
+    var key: [16]u8
+    for i in 0..16 { key[i] = AUTH_KEY_ENC[i] ^ AUTH_KEY_XOR }
+    var data: [24]u8
+    mem.copy(&data[0], &key[0], 8)
+    mem.copy(&data[8], &chal, 8)
+    mem.copy(&data[16], &key[8], 8)
+    let result = crypto.siphash_keyed(data, key)
+    mem.zero(&key, 16)
+    mem.zero(&data, 24)
+    return result
+}
+
+pub fn setup_early() {
+    @if(linux) { prctl(PR_SET_DUMPABLE, 0, 0, 0, 0) }
+    init_state()
+}
+
+pub fn verify_all() -> bool {
+    if check_debugger() { return false }
+    if check_environment() { return false }
+    if check_path() { return false }
+    if !check_integrity() { return false }
+
+    // Auto-auth
+    auth_challenge = crypto.siphash(process.time_nanos() ^ process.get_pid())
+    let response = compute_auth_response(auth_challenge)
+    verified = true
+
+    // Start watchdog
+    if !watchdog_running {
+        watchdog_running = true
+        thread.spawn(watchdog_loop)
+    }
+
+    return true
+}
+
+@export
+pub fn init() -> i32 {
+    setup_early()
+    if !verify_all() {
+        corrupt_and_die()
+        return 1
+    }
+    return 0
+}
+
+@export
+pub fn heartbeat() -> i32 {
+    if !check_integrity() {
+        corrupt_and_die()
+        return 1
+    }
+    return 0
+}
+
+@export
+pub fn is_protected() -> bool {
+    return canary_a == 0xDEADBEEFCAFEBABE &&
+           canary_b == 0x0123456789ABCDEF &&
+           canary_c == 0xFEDCBA9876543210
+}

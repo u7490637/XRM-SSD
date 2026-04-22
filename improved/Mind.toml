@@ -1,0 +1,67 @@
+# xrm-ssd Protected Governance Library — MIND Build Configuration
+# Copyright (c) 2026 STARGA, Inc. All rights reserved.
+# PROPRIETARY AND CONFIDENTIAL
+
+[package]
+name = "xrmgov"
+version = "0.2.0"
+authors = ["STARGA, Inc. <ceo@star.ga>"]
+description = "XRM-SSD governance kernels with MIND runtime protection"
+license = "Proprietary"
+
+[lib]
+type = "dylib"
+entry = "src/lib.mind"
+
+[build]
+entry = "src/lib.mind"
+output = "libxrmgov"
+optimization = "aggressive"
+strip = true
+lto = true
+
+# Export map — only these symbols reach .dynsym.
+[exports]
+xrmgov_inv1_non_negative         = "xrmgov_protected.inv1"
+xrmgov_inv2_sum_bounded          = "xrmgov_protected.inv2"
+xrmgov_inv3_l2_bounded           = "xrmgov_protected.inv3"
+xrmgov_inv4_mean_in_band         = "xrmgov_protected.inv4"
+xrmgov_inv5_variance_bounded     = "xrmgov_protected.inv5"
+xrmgov_inv6_max_bounded          = "xrmgov_protected.inv6"
+xrmgov_inv7_row_sums_nonneg      = "xrmgov_protected.inv7"
+xrmgov_inv8_col_range_bounded    = "xrmgov_protected.inv8"
+xrmgov_inv9_determinism_fence    = "xrmgov_protected.inv9"
+xrmgov_gov9_evaluate             = "xrmgov_protected.gov9_evaluate"
+xrmgov_init                      = "protection.init"
+xrmgov_check                     = "protection.heartbeat"
+xrmgov_protected                 = "protection.is_protected"
+xrmgov_verified                  = "auth.is_verified"
+xrmgov_version                   = "xrmgov_protected.version"
+xrmgov_shutdown                  = "xrmgov_protected.shutdown"
+
+[targets.cpu]
+backend = "cpu"
+sources = [
+    "src/lib.mind",
+    "src/gov9.mind",
+    "protection/src/protection.mind",
+]
+c_sources = [
+    "protection/src/protection.c",
+    "protection/src/xrmgov_protected.c",
+]
+headers = [
+    "protection/src/protection.h",
+]
+output = "libxrmgov"
+
+[platforms.linux]
+output_ext = ".so"
+compiler_flags = ["-fPIC", "-fvisibility=hidden", "-shared"]
+
+# mindc [protection] transforms — compiler-side obfuscation layer
+[protection]
+obfuscate_strings = true
+anti_debug        = true
+anti_tamper       = true
+vm_protection     = true

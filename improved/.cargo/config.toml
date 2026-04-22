@@ -1,0 +1,29 @@
+# Link-time hardening + L4-host autovectorization.
+#
+# Perf:
+#   target-cpu=native           let LLVM emit AVX2/AVX-512/FMA on Polo's
+#                               L4 box (Sapphire Rapids class). gov9 inner
+#                               loops autovectorize well with this hint.
+#                               Override for portable build with
+#                               RUSTFLAGS="-C target-cpu=x86-64-v2".
+#
+# Protection:
+#   -Wl,--build-id=none         no unique build fingerprint
+#   -Wl,-z,noexecstack          non-executable stack
+#   -Wl,-z,relro -Wl,-z,now     full relro + eager binding
+#   -Wl,--gc-sections           drop unused code sections
+#   -Wl,--as-needed             drop unused DT_NEEDED libs
+#   -Wl,-rpath,$ORIGIN          find sibling libs without LD_LIBRARY_PATH
+#   -Cstrip=symbols             strip all symbols
+[target.x86_64-unknown-linux-gnu]
+rustflags = [
+    "-C", "target-cpu=native",
+    "-C", "link-arg=-Wl,--build-id=none",
+    "-C", "link-arg=-Wl,-z,noexecstack",
+    "-C", "link-arg=-Wl,-z,relro",
+    "-C", "link-arg=-Wl,-z,now",
+    "-C", "link-arg=-Wl,--gc-sections",
+    "-C", "link-arg=-Wl,--as-needed",
+    "-C", "link-arg=-Wl,-rpath,$ORIGIN",
+    "-C", "strip=symbols",
+]
