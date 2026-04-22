@@ -1,0 +1,28 @@
+[package]
+name = "xrmgov"
+version = "0.1.0"
+authors = ["STARGA, Inc. <ceo@star.ga>"]
+description = "XRM-SSD governance kernel compiled via mindc"
+license = "Proprietary"
+
+[build]
+entry = "src/lib.mind"
+optimization = "aggressive"
+strip = true
+lto = true
+
+[targets.cpu]
+backend = "cpu"
+sources = [
+    "src/lib.mind",
+    "src/gov9.mind",
+]
+
+[platforms.linux]
+compiler_flags = ["-fPIC"]
+
+[protection]
+obfuscate_strings = true
+anti_debug = true
+anti_tamper = true
+vm_protection = true
