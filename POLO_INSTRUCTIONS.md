@@ -1,237 +1,179 @@
-# Instructions for Polo — XRM-SSD V23.3 × MIND Port Bench
+# For Polo — How to Run the MIND Port vs Hybrid Bench
 
-Hi Polo. This doc walks you through running the MIND-port comparison on
-your Lightning AI L4 host. Three paths depending on what you have in
-place; pick whichever is easiest.
-
-Nothing in this doc fabricates numbers. Every TPS figure is produced on
-your hardware by `make compare`.
+One-page runbook. Everything below runs on your existing Lightning AI
+L4 host. No Python rewrite. No changes to your `main.rs`.
 
 ---
 
-## TL;DR
+## What this produces
+
+A single `comparison.md` with measured TPS for both sides on the
+**same hardware**:
+
+```
+| Intervention ratio | Hybrid (main.rs) TPS | MIND port TPS | Speedup |
+| 1%                 | …                    | …             | …       |
+| 5%                 | …                    | …             | …       |
+| 10%                | …                    | …             | …       |
+| 25%                | …                    | …             | …       |
+| 50%                | …                    | …             | …       |
+```
+
+No projected numbers — cells say `not measured` when a side has not
+been run yet. When both sides are measured, the speedup fills in
+automatically.
+
+See also `CAPABILITIES.md` for what the MIND port delivers beyond TPS
+(sealed blob, deterministic replay, evidence chain, attestation).
+
+---
+
+## Prereqs on your Lightning AI L4
+
+Run this first — it is diagnostic, never fails the build:
 
 ```bash
-# On your Lightning AI L4 instance, with the repo checked out:
+cd test-harness
+make check-env
+```
+
+It prints a table of what is present:
+
+| Tool | Needed for | Who provides it |
+|---|---|---|
+| `cargo` + Rust | hybrid baseline | you (already used) |
+| `python3` 3.10+ | parse + compare | host |
+| `sha256sum` | seal | coreutils |
+| `mindc` | MIND build | **STARGA internal** — ask us |
+| XRM V23.3 reflection blob | seal + build + run | **you** — set `XRM_BLOB=…` |
+| NVIDIA L4 + CUDA 13 | both sides | host |
+
+---
+
+## Path A — just the hybrid baseline (no MIND needed)
+
+This reproduces your existing V23.3 result on this host and parses it
+into the JSON the comparison uses. You can do this today.
+
+```bash
 git clone https://github.com/u7490637/XRM-SSD.git
 cd XRM-SSD
 git checkout mind-port-offscale
 cd test-harness
 
-# 1. Baseline (your existing main.rs — always works, no MIND needed)
-make run-hybrid-capture      # runs cargo run --release, saves stdout
-python3 scripts/parse_hybrid_stdout.py \
-    hybrid_stdout.log results_hybrid.json
-
-# 2. MIND-port side (only if STARGA has given you mindc + the blob path)
-export XRM_BLOB=/path/to/libxrm_ssd_v23_3.so   # your XRM reflection .so
-make seal
-make build
-make run
-
-# 3. Emit the comparison
-make compare
+make run-hybrid-capture   # runs your main.rs, tees stdout to hybrid_stdout.log
+make parse-hybrid         # -> results_hybrid.json
+make compare              # -> comparison.md (MIND column: not measured)
 cat comparison.md
 ```
 
-If you only have step 1 (hybrid), `make compare` still works — the
-MIND column shows `not measured` and we'll run the MIND side locally
-and send you the JSON.
+If this is all you do, we will use `results_hybrid.json` as the
+apples-to-apples baseline and run the MIND side on our hardware.
 
 ---
 
-## 0. Prereqs on your Lightning AI L4
-
-| | Required by | Already on your host? |
-|-|-|-|
-| CUDA 13.0, NVIDIA L4 | both paths | yes (from the V23.3 bench report) |
-| Python 3.12+ | `compare.py`, `parse_hybrid_stdout.py` | yes |
-| Rust 1.70+ with `cargo` | `run-hybrid` | yes (you compiled main.rs already) |
-| `sha256sum` | `seal_blob.sh` | yes (coreutils default) |
-| `mindc` | `run` (MIND port only) | **STARGA internal** — ask us |
-| XRM-SSD V23.3 reflection blob | `seal`, `build`, `run` | **yours** — point XRM_BLOB at it |
-
-Quick environment check:
-
-```bash
-make check-env
-```
-
-This prints what's present and what's missing. It will not fail the
-build — it's diagnostic.
-
----
-
-## 1. Hybrid baseline (your existing Rust/PyO3 main.rs)
-
-This path needs nothing from STARGA. It runs your existing
-`xrm_ssd_v23_3_integration/main.rs` exactly as you've been running it.
-
-```bash
-cd test-harness
-make run-hybrid-capture
-```
-
-That runs `cargo run --release` in `../xrm_ssd_v23_3_integration/`,
-tees stdout to `hybrid_stdout.log`, and then:
-
-```bash
-python3 scripts/parse_hybrid_stdout.py \
-    hybrid_stdout.log results_hybrid.json
-```
-
-parses your existing printed table:
-
-```
-XRM intervention ratio: 1% => Overall System TPS: 94591.43
-XRM intervention ratio: 5% => Overall System TPS: 445137.28
-...
-```
-
-into a stable JSON:
-
-```json
-{
-  "source": "hybrid_main_rs",
-  "host": "lightning-ai.l4",
-  "timestamp_utc": "2026-04-22T04:11:03Z",
-  "iterations_per_ratio": 1000000,
-  "1%":  94591,
-  "5%":  445137,
-  "10%": 228784,
-  "25%": 92208,
-  "50%": 45615
-}
-```
-
-`compare.py` consumes this shape. Your `main.rs` doesn't need to be
-modified. If the printed format ever changes, the parser is a 20-line
-regex — trivial to adjust.
-
----
-
-## 2. MIND-port side
-
-The MIND port replaces the PyO3 + Rust cdylib shim with a single
-native ELF that calls the **same** XRM reflection blob through a
-sealed FFI. No Python in the hot path.
+## Path B — full comparison on your L4
 
 Two things you need:
 
-1. `mindc` — STARGA's MIND compiler (internal toolchain, not in this
-   repo). We ship the compiled binary to you on request; the compiler
-   itself doesn't need to live on your host if we do the build on
-   ours and hand you the ELF.
-2. The XRM reflection blob — your `libxrm_ssd_v23_3.so` (or `.cubin`).
-   Only its SHA-256 is embedded in the MIND binary; the blob itself
-   stays on your host.
+1. The XRM reflection blob path on this host, e.g. `libxrm_ssd_v23_3.so`
+2. `mindc` — STARGA's MIND compiler (we ship the compiled binary to you
+   on request; the compiler itself does not need to live on your host
+   if we do the build and hand you the ELF)
 
-### 2a. If we build the ELF on our side and ship it to you
-
-```bash
-# One-time: we send you `xrm_mind_port-<githash>-l4-cuda.elf`
-export XRM_BLOB=/path/to/libxrm_ssd_v23_3.so
-./xrm_mind_port --iterations 1000000 --ratios 100,500,1000,2500,5000 \
-    --json results_mind.json
-```
-
-### 2b. If you have `mindc` on the Lightning host
+### B1 — you have `mindc` on the L4
 
 ```bash
 cd test-harness
 export XRM_BLOB=/path/to/libxrm_ssd_v23_3.so
-make check-env        # sanity
-make seal             # sha256 → seal_hashes.inc
-make build            # produces ./xrm_mind_port ELF
-make run              # runs sweep → results_mind.json
-```
 
----
-
-## 3. Produce the table
-
-Once one or both sides have produced JSON:
-
-```bash
-cd test-harness
-make compare
+make check-env         # sanity
+make seal              # sha256 -> seal_hashes.inc (compile-time bake)
+make build             # -> ./xrm_mind_port ELF (fully protected)
+make run               # -> results_mind.json
+make verify-replay     # -> runs the sweep twice, asserts chain roots match
+make compare           # -> comparison.md
 cat comparison.md
 ```
 
-Output example (values filled in only where measurements exist):
+### B2 — we build the ELF on our side and ship it to you
 
-```
-| Intervention ratio | Hybrid (main.rs) TPS | MIND port TPS | Speedup |
-|--------------------|----------------------|---------------|---------|
-| 1%                 | 94,591               | not measured  | —       |
-| 5%                 | 445,137              | not measured  | —       |
-| 10%                | 228,784              | not measured  | —       |
-| 25%                | 92,208               | not measured  | —       |
-| 50%                | 45,615               | not measured  | —       |
+```bash
+# We send: xrm_mind_port-<githash>-l4-cuda.elf  and  seal_hashes.inc
+export XRM_BLOB=/path/to/libxrm_ssd_v23_3.so
+
+./xrm_mind_port --iterations 1000000 \
+                --ratios 100,500,1000,2500,5000 \
+                --json results_mind.json
+./xrm_mind_port --replay --iterations 100000 \
+                --json results_replay.json
+
+python3 compare.py --mind results_mind.json \
+                   --hybrid results_hybrid.json \
+                   --out comparison.md
+cat comparison.md
 ```
 
-When the MIND column fills in, the speedup column fills in
-automatically. If it's 1.0x we'll know the shim wasn't the bottleneck.
-If it's materially above 1.0x we'll know it was. Either answer is
-useful.
+The ELF's seal refuses to run if `XRM_BLOB` has been byte-modified
+since we sealed it. Rebuild the seal header if the blob changes.
 
 ---
 
-## 4. What's being protected on the MIND side
+## What the MIND port actually shows
 
-Full detail in `protection/README.md`. Short version: the ELF you run
-hides STARGA's MIND runtime, governance kernel, evidence chain, and
-Q16.16 primitives behind the four `[protection]` compiler transforms
-plus fourteen always-on runtime guards plus a linker version script
-that exports exactly four symbols:
+Beyond a TPS delta, the MIND port produces four structural outputs
+the hybrid path cannot produce (see `CAPABILITIES.md` for mechanisms):
 
-```
-xrm_mind_port_main
-xrm_mind_port_run_sweep
-xrm_mind_port_version
-xrm_mind_port_seal_ok
-```
-
-Nothing else is externally visible — no `kernel_*`, no `invariant_*`,
-no `mind_runtime_*`, no `get_source`, no `_mind_debug_*`. The XRM blob
-is opaque: only its SHA-256 is baked in at build time; we never decode
-or embed your code.
+1. **Sealed-blob verdict.** Each dispatch re-checks the XRM blob's
+   SHA-256 before calling into it. If the blob on disk changes,
+   `Verdict::Rejected(0)` fires and the bench exits non-zero.
+2. **Evidence chain root per ratio.** Appears in `results_mind.json`
+   as `chain_root`. Two runs on two different substrates with the
+   same input produce the same root, byte for byte.
+3. **`make verify-replay`.** Runs the sweep twice and asserts all five
+   chain roots are equal. Exit 0 = deterministic; exit non-zero =
+   something (usually a hardware-side non-deterministic path) broke.
+4. **Per-ratio attestation.** Pairs the logical chain depth with a
+   physical-clock skew fingerprint of your L4 host. Lets a third
+   party verify the binary ran on the hardware it was sealed for.
 
 ---
 
-## 5. If something goes wrong
+## If something goes wrong
 
-- `make check-env` for a list of what's missing.
-- `make run-hybrid-capture` fails → check `hybrid_stdout.log` for the
-  cargo error. It's your existing main.rs; STARGA hasn't modified it.
-- `make build` fails with "mindc not on PATH" → you don't have the
-  STARGA toolchain. Ask us for the pre-built ELF (path 2a).
-- `make build` fails with "XRM blob not found" → export `XRM_BLOB=…`
-  to wherever your `libxrm_ssd_v23_3.so` lives on the Lightning host.
-- `./xrm_mind_port` exits immediately with a non-zero status → the
-  seal check failed; the blob on disk no longer matches the one that
-  was sealed at build time. Rebuild with `make seal && make build`.
+- `make check-env` shows what is missing on this host.
+- `make run-hybrid-capture` fails → check `hybrid_stdout.log`. It is
+  your existing `main.rs`; we do not modify it.
+- `make build` fails with `mindc: not found` → you do not have the
+  STARGA toolchain. Switch to path B2 and we ship the ELF.
+- `make build` fails with `XRM_BLOB not found` →
+  `export XRM_BLOB=/absolute/path/to/libxrm_ssd_v23_3.so`.
+- `./xrm_mind_port` exits non-zero immediately → the blob on disk no
+  longer matches the SHA-256 that was sealed. Run `make seal` and
+  `make build` again, then `make run`.
+- `make verify-replay` fails (exit non-zero) → please send us the
+  two `results_replay_a.json` and `results_replay_b.json`. The
+  divergence is usually on your XRM side and we will help diff it.
 
 ---
 
-## 6. What we need from you to move faster
+## What we need from you to move faster
 
-1. The path to `libxrm_ssd_v23_3.so` (or the equivalent .cubin) on the
-   Lightning host, so we can write the exact `XRM_BLOB=` line.
+1. Path to `libxrm_ssd_v23_3.so` (or the `.cubin`) on this host.
 2. Confirmation of the FFI signature. The MIND port currently assumes:
+
    ```c
    Hash256 xrm_reflect(
        const uint8_t *blob_ptr,
        const uint8_t *txn_bytes,
        uint64_t       txn_len);
    ```
-   If yours is different (different return type, extra context ptr),
-   tell us and we'll adjust the `extern fn` declaration — no harness
-   change required.
-3. Whether you want the MIND ELF built on our side and shipped to you
-   (path 2a) or `mindc` provisioned on the Lightning host (path 2b).
-   Either works for us.
 
-Any questions, just reply on the thread.
+   If yours is different, tell us what it is and we will adjust the
+   `extern fn` in `examples/xrm_mind_port.mind`. No harness change.
+3. Preference for B1 (mindc on your L4) vs B2 (we ship the ELF).
+
+Reply on the thread with any of these and we will move immediately.
 
 — Nikolai, STARGA
+ceo@star.ga

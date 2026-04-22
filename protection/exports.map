@@ -32,6 +32,13 @@ XRM_MIND_PORT_0_1 {
         verify_blob_seal*;
         xrm_reflect*;
         dispatch*;
+        mind_only_path*;
+        evidence_chain_*;
+        evidence_root_*;
+        clock_*;
+        attest_run*;
+        bench_one*;
+        replay_verify*;
         Q16_16_*;
         Hash256_*;
         spec_hash_*;

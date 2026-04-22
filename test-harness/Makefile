@@ -22,7 +22,8 @@ ITERATIONS      ?= 1000000
 RATIOS          ?= 100,500,1000,2500,5000
 
 .PHONY: all seal build run compare clean check check-env \
-        run-hybrid run-hybrid-capture parse-hybrid help
+        run-hybrid run-hybrid-capture parse-hybrid help \
+        verify-replay show-capabilities
 
 help:
 	@echo "Targets:"
@@ -33,7 +34,9 @@ help:
 	@echo "  make seal                  SHA-256 the XRM blob into $(SEAL_HEADER)."
 	@echo "  make build                 Compile the MIND port ELF (needs mindc)."
 	@echo "  make run                   Run the MIND port ELF → results_mind.json."
+	@echo "  make verify-replay         Run sweep twice, assert chain roots match (determinism)."
 	@echo "  make compare               Emit comparison.md (uses whichever JSON exists)."
+	@echo "  make show-capabilities     Print the MIND-vs-hybrid capability map."
 	@echo "  make clean                 Remove build / seal / results / log files."
 
 all: check seal build
@@ -97,6 +100,19 @@ run: $(OUT)
 	./$(OUT) --iterations $(ITERATIONS) --ratios $(RATIOS) --json results_mind.json
 	@echo "Wrote results_mind.json"
 
+# Run the sweep twice, assert that every per-ratio chain root matches.
+# Exit 0 = deterministic replay holds. Non-zero = divergence.
+# This is the structural guarantee the hybrid main.rs path cannot make.
+verify-replay: $(OUT)
+	@echo "=== MIND Port: deterministic replay check ==="
+	./$(OUT) --iterations $(ITERATIONS) --ratios $(RATIOS) \
+	    --json results_replay_a.json
+	./$(OUT) --iterations $(ITERATIONS) --ratios $(RATIOS) \
+	    --json results_replay_b.json
+	python3 scripts/assert_chain_equal.py \
+	    results_replay_a.json results_replay_b.json
+	@echo "OK: chain roots match across both runs."
+
 # ---------------- Hybrid baseline ----------------
 
 # Runs Polo's existing main.rs. Prints to stdout only (his original behavior).
@@ -143,4 +159,13 @@ compare:
 clean:
 	rm -f $(OUT) $(SEAL_HEADER) \
 	      results_mind.json results_hybrid.json comparison.md \
+	      results_replay_a.json results_replay_b.json \
 	      $(HYBRID_STDOUT)
+
+# ---------------- Reference ----------------
+
+show-capabilities:
+	@echo "See CAPABILITIES.md at the repo root for the full map."
+	@echo ""
+	@sed -n '/## Side-by-side capability map/,/## The four/p' \
+	    ../CAPABILITIES.md | sed '$$d'
