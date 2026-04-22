@@ -19,3 +19,28 @@ Test Environment:
 - Version: XRM-SSD V23.3
 
 Test results will be regularly updated in the notebooks and benchmarks folders of this repository.
+
+---
+
+## MIND Port (branch: `mind-port-offscale`)
+
+STARGA is porting the hybrid harness to native MIND to remove the
+PyO3 + Rust-cdylib overhead in `main.rs` and to lock the runtime
+behind STARGA's `[protection]` transform set.
+
+- **Port source:** `examples/xrm_mind_port.mind`
+- **Test harness:** `test-harness/` — reproducible Makefile + compare.py
+- **Protection manifest:** `protection/` — Mind.toml, exports.map, README
+
+The harness does **not** fabricate numbers. `make compare` reads JSON
+from both the existing hybrid run and the MIND-port run on the same
+host and writes a side-by-side table. Cells are marked `not measured`
+when a side hasn't been run yet; no projected TPS values are shipped.
+
+Running the MIND port requires `mindc` (STARGA internal toolchain) and
+the XRM-SSD V23.3 reflection blob (Dollarchip). Running the hybrid
+baseline requires only the existing `xrm_ssd_v23_3_integration/`
+Rust+Python setup.
+
+See `test-harness/README.md` for the step-by-step and
+`protection/README.md` for what's locked in the MIND-side binary.
