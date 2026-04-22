@@ -2,49 +2,78 @@
 
 Measure, don't speculate.
 
+> **For Polo:** step-by-step run instructions live in the repo root at
+> [`POLO_INSTRUCTIONS.md`](../POLO_INSTRUCTIONS.md). This file is the
+> reference for what the harness contains.
+
 ## What this directory is
 
 A reproducible bench harness that runs both sides of the comparison on the
 **same hardware** and writes the results to a single comparison table:
 
-- **Hybrid baseline** — the existing `xrm_ssd_v23_3_integration/main.rs` path
-  (PyO3 → Rust cdylib → XRM-SSD V23.3 reflection blob).
+- **Hybrid baseline** — the existing `xrm_ssd_v23_3_integration/main.rs`
+  path (PyO3 → Rust cdylib → XRM-SSD V23.3 reflection blob). Unchanged.
+  Captured stdout is parsed by `scripts/parse_hybrid_stdout.py` into
+  `results_hybrid.json`.
 - **MIND port** — `examples/xrm_mind_port.mind` compiled with `mindc` to a
-  single native ELF that calls the **same** XRM blob through a sealed extern
-  FFI, no PyO3 and no Rust wrapper.
+  single native ELF that calls the **same** XRM blob through a sealed
+  extern FFI. No PyO3, no Rust wrapper. Emits `results_mind.json`.
 
-Both sides run the same 9-invariant governance suite, the same intervention
-ratio sweep (1/5/10/25/50%), and the same input generator. The only thing
-that changes is the execution environment around the XRM reflection call.
+Both sides run the same 9-invariant governance suite, the same
+intervention ratio sweep (1 / 5 / 10 / 25 / 50%), and the same input
+generator. The only thing that changes is the execution environment
+around the XRM reflection call.
+
+## File layout
+
+```
+test-harness/
+├── Makefile                        # All workflow targets
+├── seal_blob.sh                    # SHA-256 an XRM blob → seal_hashes.inc
+├── compare.py                      # Emit comparison.md from JSON files
+├── scripts/
+│   └── parse_hybrid_stdout.py      # main.rs stdout → results_hybrid.json
+├── seal_hashes.inc                 # (generated) blob SHA-256 include
+├── hybrid_stdout.log               # (generated) raw main.rs output
+├── results_hybrid.json             # (generated) parsed hybrid TPS table
+├── results_mind.json               # (generated) MIND-port TPS table
+├── comparison.md                   # (generated) side-by-side markdown
+└── xrm_mind_port                   # (generated) protected MIND ELF
+```
 
 ## Prerequisites (not shipped in this public repo)
 
-| Component | Source | Notes |
-|-----------|--------|-------|
-| `mindc`   | STARGA internal toolchain | Required for `[protection]` builds |
-| XRM-SSD V23.3 reflection blob | Dollarchip (Polo) | Place at `../libs/xrm_ssd_v23_3.so` or export `XRM_BLOB=…` |
-| CUDA 13.0, NVIDIA L4 | host | Matches the original XRM-SSD V23.3 report |
-| Python 3.12+ | host | Only for `compare.py` (pure stdlib) |
+| Component | Source | Needed for |
+|-----------|--------|------------|
+| `cargo`, Rust toolchain | host | `run-hybrid` (Polo's existing path) |
+| `python3` 3.10+ | host | `parse-hybrid`, `compare` |
+| `sha256sum` | coreutils | `seal` |
+| `mindc` | STARGA internal toolchain | `build` (MIND-side only) |
+| XRM-SSD V23.3 reflection blob | Dollarchip (Polo) | `seal`, `build`, `run` |
+| CUDA 13.0, NVIDIA L4 | host | matches V23.3 bench report |
 
 ## Running
 
 ```bash
-# 1. Seal the XRM blob (emits seal_hashes.inc with SHA-256)
-make seal
+# 0. Sanity check what's present on this host.
+make check-env
 
-# 2. Build the locked, protected MIND binary
-make build
+# 1. Hybrid baseline — always works if cargo + Polo's main.rs are present.
+make run-hybrid-capture    # runs main.rs, tees stdout to hybrid_stdout.log
+make parse-hybrid          # -> results_hybrid.json
 
-# 3. Run each side. Both emit a JSON file for compare.py to consume.
-make run-hybrid      # writes results_hybrid.json
-make run             # writes results_mind.json
+# 2. MIND port (only if mindc + XRM blob are available).
+export XRM_BLOB=/path/to/libxrm_ssd_v23_3.so
+make seal                  # sha256 -> seal_hashes.inc
+make build                 # -> xrm_mind_port ELF (protected)
+make run                   # -> results_mind.json
 
-# 4. Produce the side-by-side table
+# 3. Side-by-side table.
 make compare
 cat comparison.md
 ```
 
-## What the table contains
+## What `comparison.md` contains
 
 ```
 | Intervention ratio | Hybrid (main.rs) TPS | MIND port TPS | Speedup |
@@ -55,22 +84,24 @@ measured on this host, the cell says `not measured`, not a guess.
 
 ## What's being protected on the MIND side
 
-This harness compiles `xrm_mind_port.mind` with the `[protection]` module
-attribute, the `protection/Mind.toml` transform set, and the
+This harness compiles `examples/xrm_mind_port.mind` with the `[protection]`
+module attribute, the `protection/Mind.toml` transform set, and the
 `protection/exports.map` version script. The result:
 
-1. The XRM reflection blob is sealed by SHA-256 at compile time; any byte
-   change after the build causes `verify_blob_seal()` to fail and the
-   dispatch path to reject.
-2. STARGA's MIND runtime inside the ELF exports only the explicit symbol
-   set listed in `exports.map`. No governance internals, no `get_source`,
-   no debug glue are externally visible.
-3. The binary is stripped of source embedding, symbol names, and
-   `.comment` metadata — no toolchain fingerprint, no reverse path back
-   to `.mind` source.
+1. **XRM blob sealed at compile time.** The reflection blob's SHA-256 is
+   baked in; any byte change after the build causes `verify_blob_seal()`
+   to fail and the dispatch path to reject.
+2. **MIND runtime locked.** STARGA's runtime libraries (governance kernel,
+   evidence chain, Q16.16 primitives) are linked into the ELF under the
+   full protection transforms. Source never leaves our toolchain.
+3. **Minimal export surface.** `exports.map` exposes only four symbols:
+   `xrm_mind_port_main`, `xrm_mind_port_run_sweep`, `xrm_mind_port_version`,
+   `xrm_mind_port_seal_ok`. Everything else is forced LOCAL.
+4. **Stripped binary.** Source embeddings, full symbol table, and
+   `.comment` are removed — no toolchain fingerprint, no reverse path
+   back to `.mind` source.
 
-Full list of runtime protections and compiler transforms that ship on
-the MIND side: `protection/README.md`.
+Full list in `../protection/README.md`.
 
 ## What's NOT in this harness
 
@@ -81,17 +112,17 @@ the MIND side: `protection/README.md`.
 - **Private MIND runtime source.** STARGA's MIND runtime libraries are
   loaded from `mindc`'s internal toolchain at build time and linked into
   the final ELF under the protection transforms above. No runtime source
-  is shipped or exposed.
+  is shipped or exposed here.
 
-## Reproducing the original XRM-SSD V23.3 numbers first
+## Reproducing Polo's original V23.3 numbers first
 
-If you don't want to build the MIND port, you can still reproduce Polo's
-existing hybrid benchmark:
+If you don't have `mindc`, the hybrid baseline still reproduces the
+existing V23.3 report on this host:
 
 ```bash
-make run-hybrid
+make run-hybrid-capture
+make parse-hybrid
+make compare
 ```
 
-That runs the unmodified `xrm_ssd_v23_3_integration/main.rs` and writes
-its sweep into `results_hybrid.json`. The MIND port comparison is an
-optional second step that requires `mindc`.
+The MIND column will show `not measured` until `make run` succeeds.

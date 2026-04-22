@@ -28,19 +28,23 @@ STARGA is porting the hybrid harness to native MIND to remove the
 PyO3 + Rust-cdylib overhead in `main.rs` and to lock the runtime
 behind STARGA's `[protection]` transform set.
 
+- **Run instructions for Polo:** [`POLO_INSTRUCTIONS.md`](POLO_INSTRUCTIONS.md)
 - **Port source:** `examples/xrm_mind_port.mind`
-- **Test harness:** `test-harness/` — reproducible Makefile + compare.py
-- **Protection manifest:** `protection/` — Mind.toml, exports.map, README
+- **Test harness:** `test-harness/` — `make check-env`, `run-hybrid-capture`,
+  `parse-hybrid`, `seal`, `build`, `run`, `compare`
+- **Protection manifest:** `protection/` — `Mind.toml`, `exports.map`, README
 
 The harness does **not** fabricate numbers. `make compare` reads JSON
-from both the existing hybrid run and the MIND-port run on the same
-host and writes a side-by-side table. Cells are marked `not measured`
-when a side hasn't been run yet; no projected TPS values are shipped.
+from both the existing hybrid run (parsed from Polo's unmodified `main.rs`
+stdout) and the MIND-port run on the same host, then writes a
+side-by-side table. Cells are marked `not measured` when a side hasn't
+been run yet; no projected TPS values are shipped.
 
 Running the MIND port requires `mindc` (STARGA internal toolchain) and
 the XRM-SSD V23.3 reflection blob (Dollarchip). Running the hybrid
 baseline requires only the existing `xrm_ssd_v23_3_integration/`
-Rust+Python setup.
+Rust+Python setup — no changes to `main.rs`.
 
-See `test-harness/README.md` for the step-by-step and
+See [`POLO_INSTRUCTIONS.md`](POLO_INSTRUCTIONS.md) for the step-by-step,
+`test-harness/README.md` for harness internals, and
 `protection/README.md` for what's locked in the MIND-side binary.
