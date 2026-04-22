@@ -1,0 +1,7 @@
+# Build artifacts
+target/
+target-rust/
+protection/libxrmgov.so
+protection/src/*.o
+*.o
+*.rlib
