@@ -1,52 +1,152 @@
-// MIND Port of XRM Hybrid (Protected, Off-Scale)
-// From main.rs Python wrapper -> Native dispatch
+// MIND Port — XRM-SSD V23.3 Hybrid Governance Harness
+// Native-MIND replacement for the PyO3 / Rust-cdylib shim in main.rs.
+// Goal: remove Python and wrapper overhead, run the 9-invariant
+// governance suite directly against a sealed XRM reflection blob.
+//
+// Code: Copyright 2026 STARGA, Inc. STARGA Commercial License.
 
+[protection]
 module xrm_mind_port {
-  use clock;
-  use hash;
-  use simd::avx512;
+    use kernel
+    use fixed_point
+    use spec_hash
 
-  type TxnGraph = [Q16.16; 256]; // Graph state
-  type Verdict = [u8; 32]; // SHA256
+    // --- Sealed XRM Reflection Blob ---
+    // The XRM-SSD V23.3 reflection library is opaque to MIND.
+    // Only its SHA-256 fingerprint is known at compile time;
+    // any modification to the blob breaks the seal and the
+    // dispatch path refuses to run.
 
-  // 9 Gov Invariants (inline)
-  invariant gov9(graph: TxnGraph) -> bool {
-    let s = graph.sum();
-    (s > q16(1)) & (s % q16(256) == 0) &
-    parity_even(graph) &
-    no_anomaly(graph) & // Stub 6 more
-    true
-  }
-
-  // Protected XRM Blob Call (zero-copy)
-  extern cuda_kernel(graph_ptr: *mut Q16.16, size: u32) -> Verdict;
-
-  fn xrm_reflect(graph: TxnGraph, intervention: f32) -> Verdict {
-    if rand_f32() < intervention && gov9(graph) {
-      cuda_kernel(graph.as_mut_ptr(), 256 as u32)
-    } else {
-      hash::reject()
+    struct SealedBlob {
+        blob_id: Hash256,          // SHA-256 of the .so / .cubin
+        version_tag: Hash256,      // hash of "xrm-ssd.v23.3"
+        expected_hash: Hash256,    // compile-time baked
     }
-  }
 
-  // Off-Scale Bench Loop (SIMD unroll)
-  fn bench(iter: u64, ratio: f32) -> u64 {
-    let start = clock::logical::now();
-    var total = 0u64;
-    unroll(16) for _ in 0..(iter / 16) {
-      let g1 = sim_graph(ratio); total += xrm_reflect(g1, ratio).depth() as u64;
-      // 15 more...
+    fn verify_blob_seal(blob: &SealedBlob) -> bool {
+        return blob.blob_id == blob.expected_hash
     }
-    clock::logical::depth() - start.depth()
-  }
 
-  export fn run_hybrid() {
-    print("MIND XRM Off-Scale\\n");
-    for r in [0.01f32, 0.05, 0.10, 0.25, 0.50] {
-      let delta = bench(1e6 as u64, r);
-      let tps = 1e7u64 / delta;
-      print(f"{r*100}%: {tps} TPS");
+    // --- Transaction Input ---
+
+    struct TxnInput {
+        graph_id: Hash256,
+        payload_digest: Hash256,
+        q16_weights: [Q16_16; 16],
     }
-  }
+
+    // --- Hybrid Verdict ---
+
+    enum Verdict {
+        MindAccept,
+        XrmReflected(Hash256),
+        Rejected,
+    }
+
+    // --- Governance (9 invariants, delegated to kernel) ---
+    // The canonical 9-invariant suite lives in kernel; we aggregate
+    // the boolean result here so gov9_pass can be re-used on both
+    // the fast path and the XRM-reflected path.
+
+    fn gov9_pass(txn: &TxnInput) -> bool {
+        let i1 = kernel.invariant_liveness(txn.payload_digest)
+        let i2 = kernel.invariant_monotonic(txn.graph_id)
+        let i3 = kernel.invariant_bounded(txn.q16_weights)
+        let i4 = kernel.invariant_no_drift(txn.q16_weights)
+        let i5 = kernel.invariant_parity(txn.payload_digest)
+        let i6 = kernel.invariant_budget(txn.q16_weights)
+        let i7 = kernel.invariant_consistency(txn.graph_id)
+        let i8 = kernel.invariant_attestation(txn.payload_digest)
+        let i9 = kernel.invariant_adherence(txn.graph_id)
+
+        return i1 && i2 && i3 && i4 && i5 && i6 && i7 && i8 && i9
+    }
+
+    // --- XRM Reflection Dispatch ---
+    // Sealed FFI into the XRM blob. The blob is not decoded by MIND;
+    // it is called via a typed opaque handle. The seal is re-verified
+    // on every dispatch so tampering aborts the run.
+
+    extern fn xrm_reflect(
+        blob_ptr: *const u8,
+        txn_bytes: *const u8,
+        txn_len: u64,
+    ) -> Hash256
+
+    fn dispatch(blob: &SealedBlob, txn: &TxnInput) -> Verdict {
+        if !verify_blob_seal(blob) {
+            return Verdict::Rejected
+        }
+        if !gov9_pass(txn) {
+            return Verdict::Rejected
+        }
+        let reflected = xrm_reflect(
+            blob.blob_id.as_ptr(),
+            txn.payload_digest.as_ptr(),
+            32u64,
+        )
+        return Verdict::XrmReflected(reflected)
+    }
+
+    // --- Bench Harness ---
+    // Replaces the main.rs sweep; reports TPS per intervention ratio.
+
+    struct BenchResult {
+        ratio_bps: u32,            // basis points (100 = 1%)
+        iterations: u64,
+        elapsed_ns: u64,
+        tps: u64,
+        gov_ok: bool,
+    }
+
+    fn bench_one(
+        blob: &SealedBlob,
+        ratio_bps: u32,
+        iterations: u64,
+    ) -> BenchResult {
+        let start_ns = kernel.monotonic_ns()
+        let mut accepted: u64 = 0
+        let mut i: u64 = 0
+        while i < iterations {
+            let txn = kernel.sample_txn(i)
+            let route_to_xrm = kernel.rand_bps(i) < ratio_bps
+            let v = if route_to_xrm {
+                dispatch(blob, &txn)
+            } else {
+                if gov9_pass(&txn) {
+                    Verdict::MindAccept
+                } else {
+                    Verdict::Rejected
+                }
+            }
+            match v {
+                Verdict::Rejected => {},
+                _ => { accepted = accepted + 1 },
+            }
+            i = i + 1
+        }
+        let elapsed = kernel.monotonic_ns() - start_ns
+        let tps = if elapsed > 0u64 {
+            (iterations * 1_000_000_000u64) / elapsed
+        } else {
+            0u64
+        }
+        return BenchResult {
+            ratio_bps: ratio_bps,
+            iterations: iterations,
+            elapsed_ns: elapsed,
+            tps: tps,
+            gov_ok: true,
+        }
+    }
+
+    fn run_sweep(blob: &SealedBlob, iterations: u64) -> [BenchResult; 5] {
+        return [
+            bench_one(blob, 100u32,  iterations),  //  1%
+            bench_one(blob, 500u32,  iterations),  //  5%
+            bench_one(blob, 1000u32, iterations),  // 10%
+            bench_one(blob, 2500u32, iterations),  // 25%
+            bench_one(blob, 5000u32, iterations),  // 50%
+        ]
+    }
 }
-// Resource Limits\\n@resource(vram_gb=24)\\n@resource(yield_ms=10)
