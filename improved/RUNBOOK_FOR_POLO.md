@@ -57,8 +57,25 @@ sweep evidence chain root: <full 32-byte SHA-256 hex>
 Replay: same binary + same args ⇒ byte-identical root.
 ```
 
-Measured on STARGA dev box (i7-5930K, no GPU): ~95-100 K TPS sustained, 9-
-invariant governance tick per iteration, identical evidence root across runs.
+Measured on STARGA dev box (i7-5930K, no GPU): **~95-105 K TPS sustained**
+across the sweep, 9-invariant governance tick per iteration, identical
+evidence root across two consecutive runs. On your L4 box with faster single-
+core (Xeon Platinum / Sapphire Rapids class), expect proportionally higher TPS
+for this path since it is CPU-bound.
+
+Pass-rate sanity on the default thresholds:
+
+| ratio | expected passed | expected failed |
+|-------|-----------------|-----------------|
+|  1%   | ~99.0%          | ~1.0%           |
+|  5%   | ~95.2%          | ~4.8%           |
+| 10%   | ~89.9%          | ~10.1%          |
+| 25%   | ~74.9%          | ~25.1%          |
+| 50%   | ~49.9%          | ~50.1%          |
+
+If you see wildly lower pass rates at low intervention, the `inv9` replay
+fence may be tripping under your hardware's f32 rounding — open an issue,
+we tuned the relative tolerance against x86_64 default reductions.
 
 ---
 
@@ -81,10 +98,10 @@ with) are in `bin/SHA256SUMS`.
 
 ### Requirements
 
-- `mindc` v0.2.1 (STARGA MIND compiler) with `libmind_cpu_linux-x64.so` at
-  `/home/n/.nikolachess/lib/` (this path is hardcoded in the runtime linker).
-  If you don't have `mindc`, **you can still run the bench harness** — it's
-  pure Rust and doesn't require the MIND toolchain.
+- `mindc` v0.2.3 (STARGA MIND compiler) with `libmind_cpu_linux-x64.so` on
+  the dynamic loader path (default `/home/n/.nikolachess/lib/`, overridable
+  via `MIND_LIB_DIR`). If you don't have `mindc`, **you can still run the
+  bench harness** — it's pure Rust and doesn't require the MIND toolchain.
 - Rust stable (for `xrm_mind_port`).
 
 ### Steps
@@ -94,15 +111,37 @@ cd improved
 ./build.sh
 ```
 
-`build.sh` is a four-stage pipeline:
+`build.sh` is a six-stage protected build pipeline:
 
-1. `mindc build --release --target cpu` — compiles `src/lib.mind` and
-   `src/gov9.mind` into an ELF under `target/release/`.
-2. `objcopy --strip-symbol=mind_module_*_get_source` — removes the embedded
-   `.mind` source-code strings that `mindc` bakes in by default. This is the
-   same stripping pass STARGA's mind-mem release pipeline uses.
-3. `cargo build --release` — builds the Rust harness.
-4. `sha256sum` — hashes both binaries into `bin/SHA256SUMS`.
+1. **mindc compile.** `mindc build --release --target cpu` compiles
+   `src/lib.mind` + `src/gov9.mind` into a CPU-target ELF under
+   `target/release/`. mindc 0.2.3 handles tensor reductions, `select`,
+   per-axis `sum`, `min`/`max`, and the constant-folding paths used by
+   the gov9 kernel.
+2. **Strip source-embedding symbols.** `mindc` bakes `.mind` source and
+   IR into the ELF via `mind_module_<name>_get_source`,
+   `mind_module_<name>_get_ir`, `MIND_MODULE_<name>_SOURCE`, and
+   `MIND_MODULE_<name>_IR` symbols. `objcopy --strip-symbol` removes
+   each one. Same pass STARGA's mind-mem release pipeline uses.
+3. **Zero source / IR / build-path strings in `.rodata`.** Even after
+   the symbols are stripped, the underlying string literals remain in
+   `.rodata`. A `readelf`-scoped Python pass walks every printable
+   string in `.rodata` and zeroes any segment containing MIND syntax,
+   tensor-op names, build paths (`/home/`, `.nikolachess`), or VM IR
+   markers (`mic@`, `MIND_MODULE`, `VM_OP_`).
+4. **Normalize RPATH and `.comment`.** `patchelf --set-rpath '$ORIGIN'`
+   removes any absolute build-host paths from the dynamic loader hint.
+   `objcopy --remove-section .comment` then `--add-section .comment=...`
+   replaces the GCC compiler banner with `MIND: mind 0.2.3 (STARGA
+   toolchain)\0` so the binary's only attribution is the MIND chain.
+5. **cargo build --release.** Compiles the Rust bench harness with LTO,
+   `panic = "abort"`, `codegen-units = 1`, and `strip = true` from
+   `Cargo.toml`. Uses an isolated `target-rust/` directory so step 1's
+   `target/release` wipe never invalidates cargo's incremental cache.
+6. **Leak audit + SHA-256.** `strings` is rerun against the protected
+   `libxrmgov` for four leak categories (MIND syntax, comment markers,
+   build paths, MIND module symbols). Build aborts non-zero if any
+   pattern is found. Both binaries are hashed into `bin/SHA256SUMS`.
 
 ### Rust-only rebuild (no `mindc` needed)
 
@@ -120,7 +159,7 @@ cargo build --release
 improved/
 ├── Mind.toml                # mindc build config with [protection] block
 ├── Cargo.toml               # Rust bench harness config
-├── build.sh                 # 4-stage build pipeline
+├── build.sh                 # 6-stage protected build pipeline
 ├── src/
 │   ├── gov9.mind            # MIND source: 9 governance invariants as
 │   │                        #              tensor reductions (reference)
@@ -188,9 +227,11 @@ Aggregate verdict: a 9-bit bitmask encoded as `f32`. All pass ⇒ `511.0` /
   a hybrid that calls into your kernel, add a `--features triton` path and
   wire it locally — nothing in this repo needs touching.
 - **No `mindc` toolchain shipped.** `mindc` is STARGA-internal. The MIND
-  binary (`libxrmgov`) is prebuilt so you can run it without installing
-  anything. If you want to regenerate it, ping us — otherwise, `xrm_mind_port`
-  is the self-contained bench.
+  binary (`libxrmgov`) is prebuilt, fully stripped, and carries only the
+  `MIND: mind 0.2.3 (STARGA toolchain)` attribution in `.comment`. Source
+  strings, IR strings, and build paths are zeroed in `.rodata`; the `bin/`
+  pass verifies zero leaks before shipping. If you want to regenerate it,
+  ping us — otherwise `xrm_mind_port` is the self-contained bench.
 - **No measurement claims.** Numbers above are from our dev box. Your
   published V23.3 bench on L4 peaks at 195 TPS on the inference path and
   445 K TPS in the hybrid mode. Those measure different things — full ML

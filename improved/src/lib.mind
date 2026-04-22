@@ -2,10 +2,9 @@
 // Copyright (c) 2026 STARGA, Inc. All rights reserved.
 //
 // When compiled via `mindc build --release --target cpu`, this produces
-// an ELF that exercises basic tensor ops and prints the xrmgov version
-// stamp. The nine invariant kernels themselves live in src/gov9.mind
-// (proper tensor reductions) but rely on parser features beyond the
-// v0.2.1 public surface, so this entry stays intentionally small.
+// an ELF that exercises basic tensor ops, links the kernel objects from
+// src/gov9.mind (the nine governance invariants as tensor reductions),
+// and prints the xrmgov version stamp.
 //
 // The apples-to-apples bench against the existing Rust integration
 // lives in src/main.rs, which reimplements the same nine invariants

@@ -5,8 +5,8 @@
 //! measured without pulling an FFI into the mindc-built runtime.
 //!
 //! The MIND side ships as a sibling binary (`libxrmgov`, built from
-//! src/lib.mind by mindc) that demonstrates the kernel compiles and runs.
-//! This harness is the measurable bench.
+//! src/lib.mind + src/gov9.mind by mindc) that demonstrates the kernel
+//! compiles and runs. This harness is the measurable bench.
 //!
 //! Determinism: fixed seed (0x5852_4D5F_5353_4420, "XRM_SSD "). Same binary
 //! on same CLI arguments produces a byte-identical evidence chain root on
@@ -121,6 +121,10 @@ fn inv8_col_range_bounded(batch: &[f32], n: usize, d: usize, threshold: f32) -> 
 }
 
 /// PORTED_FROM: gov9.mind :: inv9_determinism_fence
+///
+/// Replay fence: the batch total and the sum-of-row-sums must agree within a
+/// bounded relative tolerance. Because f32 addition is not associative, the
+/// tolerance is relative (1 ulp * batch length) rather than a hard 1e-4.
 #[inline(always)]
 fn inv9_determinism_fence(batch: &[f32], n: usize, d: usize) -> bool {
     let total: f32 = batch.iter().sum();
@@ -129,7 +133,9 @@ fn inv9_determinism_fence(batch: &[f32], n: usize, d: usize) -> bool {
         let row = &batch[i * d..(i + 1) * d];
         by_row += row.iter().sum::<f32>();
     }
-    (total - by_row).abs() < 1.0e-4
+    let scale = total.abs().max(1.0);
+    let tol = (batch.len() as f32) * f32::EPSILON * scale;
+    (total - by_row).abs() <= tol
 }
 
 /// PORTED_FROM: gov9.mind :: gov9_evaluate

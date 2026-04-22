@@ -72,13 +72,18 @@ fn inv8_col_range_bounded(batch: tensor<f32[N, D]>, threshold: f32) -> tensor<f3
     return select(worst < threshold, 1.0, 0.0);
 }
 
-// I9: aggregate sanity — sum equals sum-of-row-sums (tautology the compiler
-// folds into a determinism fence; surviving in the IR confirms replay integrity)
+// I9: replay fence — batch sum equals sum-of-row-sums within a bounded
+// relative tolerance (f32 addition is not associative, so hard equality
+// would trip under legal reordering). Surviving in the IR across runs
+// confirms the compiler did not silently reorder reductions.
 fn inv9_determinism_fence(batch: tensor<f32[N, D]>) -> tensor<f32> {
     let total = sum_all(batch);
     let by_row = sum_all(sum(batch, [1]));
     let delta = abs(total - by_row);
-    return select(delta < 0.0001, 1.0, 0.0);
+    let scale = max(abs(total), 1.0);
+    // N*D elements, 1 ulp (2^-23) per add, scaled by magnitude.
+    let tol = (tensor.shape(batch, 0) * tensor.shape(batch, 1)) * 0.00000012 * scale;
+    return select(delta <= tol, 1.0, 0.0);
 }
 
 // --- Aggregate kernel: evaluates all 9 and returns a bitmask-encoded f32 ----
@@ -106,13 +111,5 @@ fn gov9_evaluate(
     let p8 = inv8_col_range_bounded(batch, col_range_thresh);
     let p9 = inv9_determinism_fence(batch);
 
-    return p1 * 1.0
-         + p2 * 2.0
-         + p3 * 4.0
-         + p4 * 8.0
-         + p5 * 16.0
-         + p6 * 32.0
-         + p7 * 64.0
-         + p8 * 128.0
-         + p9 * 256.0;
+    return p1 * 1.0 + p2 * 2.0 + p3 * 4.0 + p4 * 8.0 + p5 * 16.0 + p6 * 32.0 + p7 * 64.0 + p8 * 128.0 + p9 * 256.0;
 }
