@@ -1,0 +1,52 @@
+// MIND Port of XRM Hybrid (Protected, Off-Scale)
+// From main.rs Python wrapper -> Native dispatch
+
+module xrm_mind_port {
+  use clock;
+  use hash;
+  use simd::avx512;
+
+  type TxnGraph = [Q16.16; 256]; // Graph state
+  type Verdict = [u8; 32]; // SHA256
+
+  // 9 Gov Invariants (inline)
+  invariant gov9(graph: TxnGraph) -> bool {
+    let s = graph.sum();
+    (s > q16(1)) & (s % q16(256) == 0) &
+    parity_even(graph) &
+    no_anomaly(graph) & // Stub 6 more
+    true
+  }
+
+  // Protected XRM Blob Call (zero-copy)
+  extern cuda_kernel(graph_ptr: *mut Q16.16, size: u32) -> Verdict;
+
+  fn xrm_reflect(graph: TxnGraph, intervention: f32) -> Verdict {
+    if rand_f32() < intervention && gov9(graph) {
+      cuda_kernel(graph.as_mut_ptr(), 256 as u32)
+    } else {
+      hash::reject()
+    }
+  }
+
+  // Off-Scale Bench Loop (SIMD unroll)
+  fn bench(iter: u64, ratio: f32) -> u64 {
+    let start = clock::logical::now();
+    var total = 0u64;
+    unroll(16) for _ in 0..(iter / 16) {
+      let g1 = sim_graph(ratio); total += xrm_reflect(g1, ratio).depth() as u64;
+      // 15 more...
+    }
+    clock::logical::depth() - start.depth()
+  }
+
+  export fn run_hybrid() {
+    print("MIND XRM Off-Scale\\n");
+    for r in [0.01f32, 0.05, 0.10, 0.25, 0.50] {
+      let delta = bench(1e6 as u64, r);
+      let tps = 1e7u64 / delta;
+      print(f"{r*100}%: {tps} TPS");
+    }
+  }
+}
+// Resource Limits\\n@resource(vram_gb=24)\\n@resource(yield_ms=10)
