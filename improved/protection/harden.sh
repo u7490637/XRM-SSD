@@ -137,6 +137,43 @@ harden_one() {
         done
     fi
 
+    # Last pass: zero any residual Build ID description bytes in place.
+    # Must run AFTER strip / objcopy / symbol rewrites, because those ops
+    # can re-emit the note from internal ELF state. `objcopy --remove-section
+    # .note.gnu.build-id` sometimes fails silently on shared objects whose
+    # note is covered by a PT_NOTE program header — the section header
+    # vanishes but the loaded image keeps the 20-byte fingerprint. Zeroing
+    # the description makes the note constant-zero across builds.
+    python3 - "${path}" <<'PY'
+import subprocess, sys
+PATH = sys.argv[1]
+try:
+    out = subprocess.check_output(["readelf", "-SW", PATH], text=True,
+                                  stderr=subprocess.DEVNULL)
+except Exception:
+    sys.exit(0)
+
+offset = size = 0
+import re
+for line in out.splitlines():
+    if ".note.gnu.bu" in line:
+        # "[ 3] .note.gnu.build-id NOTE <addr> <offset> <size> ..."
+        m = re.search(r'NOTE\s+([0-9a-f]+)\s+([0-9a-f]+)\s+([0-9a-f]+)', line)
+        if m:
+            offset = int(m.group(2), 16)
+            size   = int(m.group(3), 16)
+        break
+
+if size < 36:
+    sys.exit(0)
+
+with open(PATH, "rb") as f:
+    data = bytearray(f.read())
+data[offset + 16 : offset + size] = b'\x00' * (size - 16)
+with open(PATH, "wb") as f:
+    f.write(data)
+PY
+
     cur_size=$(stat -c '%s' "${path}")
     echo "   sections removed: ${removed}  size: ${orig_size} -> ${cur_size}"
 }
