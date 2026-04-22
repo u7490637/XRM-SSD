@@ -152,6 +152,20 @@ rm -f "${TMP_COMMENT}"
 
 strip --strip-unneeded "${OUT}/libxrmgov" 2>/dev/null || true
 
+# runtime bundle added:
+# Bundle libmind_cpu_linux-x64.so alongside libxrmgov so the protected
+# binary runs without LD_LIBRARY_PATH on Polo's L4 (RPATH=$ORIGIN).
+RUNTIME_SRC="${MIND_LIB_DIR}/libmind_cpu_linux-x64.so"
+if [[ -f "${RUNTIME_SRC}" ]]; then
+    cp "${RUNTIME_SRC}" "${OUT}/libmind_cpu_linux-x64.so"
+    strip "${OUT}/libmind_cpu_linux-x64.so" 2>/dev/null || true
+    objcopy --remove-section .comment "${OUT}/libmind_cpu_linux-x64.so" 2>/dev/null || true
+    echo "   bundled libmind_cpu_linux-x64.so ($(du -h ${OUT}/libmind_cpu_linux-x64.so | cut -f1))"
+else
+    echo "   WARN: ${RUNTIME_SRC} missing — libxrmgov will require LD_LIBRARY_PATH"
+fi
+
+
 # ---------------------------------------------------------------------------
 echo "==> [5/6] cargo build --release (Rust harness)"
 # Separate target dir so mindc's target/release wipe doesn't corrupt cargo cache.
@@ -189,7 +203,7 @@ COMMENT=$(objcopy --dump-section .comment=/dev/stdout "${OUT}/libxrmgov" 2>/dev/
             | tr -d '\0' || true)
 echo "   .comment: ${COMMENT}"
 
-(cd "${OUT}" && sha256sum libxrmgov xrm_mind_port > SHA256SUMS)
+(cd "${OUT}" && sha256sum libmind_cpu_linux-x64.so libxrmgov xrm_mind_port > SHA256SUMS)
 echo
 echo "Build complete:"
 ls -la "${OUT}/"
@@ -197,5 +211,5 @@ echo
 cat "${OUT}/SHA256SUMS"
 echo
 echo "Quick smoke test:"
-echo "   cd ${OUT} && LD_LIBRARY_PATH=${MIND_LIB_DIR} ./libxrmgov"
+echo "   cd ${OUT} && ./libxrmgov   # runtime bundled; RPATH=\$ORIGIN"
 echo "   cd ${OUT} && ./xrm_mind_port --iter 10000"

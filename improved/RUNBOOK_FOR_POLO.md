@@ -1,14 +1,15 @@
 # Runbook — `improved/` MIND + XRM-SSD hybrid test
 
 Everything here is self-contained, builds on any x86_64 Linux host, and needs
-no STARGA-internal toolchain. Two binaries ship:
+no STARGA-internal toolchain. Three artifacts ship:
 
-| Binary | Size | What it proves |
+| Artifact | Size | What it proves |
 |---|---|---|
 | `bin/libxrmgov` | ~18 KB | `mindc`-compiled executable that loads and runs the MIND runtime. Source parses, tensor ops execute, binary is stripped of `mind_module_*_get_source` symbols. Proof the MIND kernel compiles and runs on your L4 host. |
+| `bin/libmind_cpu_linux-x64.so` | ~980 KB | STARGA MIND runtime, bundled next to `libxrmgov` (RPATH=`$ORIGIN`). Needed only when running `libxrmgov`. The Rust harness does not link this. |
 | `bin/xrm_mind_port` | ~400 KB | Rust bench harness. Reimplements the same nine governance invariants from `src/gov9.mind` line-for-line (see `PORTED_FROM:` comments in `src/main.rs`). This is the **measurable** bench — it emits a TPS table per intervention ratio and a SHA-256 evidence chain root. Byte-identical across runs, byte-identical regardless of `--threads`. |
 
-Both binaries ship prebuilt. You can also rebuild from source; see §3.
+All three artifacts ship prebuilt. You can also rebuild from source; see §3.
 
 ---
 
@@ -18,10 +19,8 @@ Both binaries ship prebuilt. You can also rebuild from source; see §3.
 git pull
 cd improved/bin
 
-# Smoke test: MIND kernel
-LD_LIBRARY_PATH=/home/n/.nikolachess/lib ./libxrmgov
-# If you don't have the MIND runtime on your box, skip this — the Rust
-# bench below does not require it.
+# Smoke test: MIND kernel (runtime is bundled — no LD_LIBRARY_PATH needed)
+./libxrmgov
 
 # Bench harness (the real measurement):
 ./xrm_mind_port                                   # defaults: iter=1M batch=128 features=16 threads=1
@@ -72,12 +71,13 @@ on a full 1 M-iteration sweep (Appendix A has the verbatim logs):
 
 | Mode            | Wall time | Per-ratio TPS | Aggregate sweep TPS |
 |-----------------|-----------|---------------|---------------------|
-| `--threads 1`   | 97.06 s   | ~50–54 K      | 51,517              |
-| `--threads 5`   | 20.43 s   | ~49–54 K      | 244,762             |
+| `--threads 1`   | 97.06 s   | 50.2 – 54.4 K | 51,517              |
+| `--threads 5`   | 20.43 s   | 49.0 – 53.7 K | 244,762             |
 
-4.75× wall-time speedup on five worker threads. Per-ratio TPS unchanged
-(each ratio still runs single-threaded internally so the inv9 replay
-fence stays valid). Identical sweep evidence chain root in both modes:
+4.75× wall-time speedup on five worker threads. Per-ratio TPS effectively
+unchanged (each ratio still runs single-threaded internally so the inv9
+replay fence stays valid; the small dip under parallel load is shared
+L3 / memory-bus contention, not a MIND math effect). Identical sweep evidence chain root in both modes:
 `268c6de079d2f39bced1ad93f41c7aaeb4c07f85124abbd357e35d7492ab9783`.
 That is the load-bearing claim of this harness — `--threads` is a
 wall-time knob, not a math knob. Polo's L4 host (Sapphire Rapids class,
@@ -105,6 +105,7 @@ we tuned the relative tolerance against x86_64 default reductions.
 ```bash
 cd improved/bin
 sha256sum -c SHA256SUMS
+# libmind_cpu_linux-x64.so: OK
 # libxrmgov: OK
 # xrm_mind_port: OK
 ```
@@ -119,10 +120,12 @@ with) are in `bin/SHA256SUMS`.
 
 ### Requirements
 
-- `mindc` v0.2.3 (STARGA MIND compiler) with `libmind_cpu_linux-x64.so` on
-  the dynamic loader path (default `/home/n/.nikolachess/lib/`, overridable
-  via `MIND_LIB_DIR`). If you don't have `mindc`, **you can still run the
-  bench harness** — it's pure Rust and doesn't require the MIND toolchain.
+- `mindc` v0.2.3 (STARGA MIND compiler) with `libmind_cpu_linux-x64.so`
+  reachable via `MIND_LIB_DIR` (default `/home/n/.nikolachess/lib/`).
+  `build.sh` copies the runtime into `bin/` at link time, so the
+  **shipped binaries in `bin/` do not need `mindc` or `MIND_LIB_DIR` at
+  runtime**. If you don't have `mindc` at all you can still run the bench
+  harness — it's pure Rust and doesn't touch the MIND toolchain.
 - Rust stable (for `xrm_mind_port`).
 
 ### Steps
