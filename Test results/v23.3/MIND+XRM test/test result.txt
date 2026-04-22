@@ -1,0 +1,17 @@
+✅ Updated to import_bound API
+
+=== Run results ===
+✅ MIND Runtime: XRM-SSD V23.3 loaded successfully (L4 GPU mode)
+🚀 Start Hybrid Bench: MIND Governance Routing -> XRM Reflection Correction...
+--------------------------------------------------
+📊 Collaborative Testing Results:
+XRM intervention ratio: 1% => Overall System TPS: 94591.43
+XRM intervention ratio: 5% => Overall System TPS: 445137.28
+XRM intervention ratio: 10% => Overall System TPS: 228784.68
+XRM intervention ratio: 25% => Overall System TPS: 92208.56
+XRM intervention ratio: 50% => Overall System TPS: 45615.43
+--------------------------------------------------
+MIND Governance Status: 9 Invariants Check OK
+
+
+✅ No warnings whatsoever!
