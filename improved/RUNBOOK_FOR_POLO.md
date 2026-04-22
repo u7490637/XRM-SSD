@@ -57,11 +57,15 @@ sweep evidence chain root: <full 32-byte SHA-256 hex>
 Replay: same binary + same args ⇒ byte-identical root.
 ```
 
-Measured on STARGA dev box (i7-5930K, no GPU): **~95-105 K TPS sustained**
-across the sweep, 9-invariant governance tick per iteration, identical
-evidence root across two consecutive runs. On your L4 box with faster single-
-core (Xeon Platinum / Sapphire Rapids class), expect proportionally higher TPS
-for this path since it is CPU-bound.
+Measured on STARGA dev box (i7-5930K @ 3.5 GHz, single core, no GPU):
+**~46–51 K TPS sustained** across the sweep on a full 1 M-iteration run
+(see Appendix A for the actual log). 9-invariant governance tick per
+iteration, identical evidence chain root across two consecutive runs.
+On your L4 host the CPU side is a Xeon Platinum / Sapphire Rapids class
+core — expect roughly 2–3× higher TPS on this path since it is purely
+CPU-bound. The harness is single-threaded by design (the determinism
+fence requires a stable accumulator order); a multi-threaded variant
+that fans out per-ratio is straightforward and can be added if useful.
 
 Pass-rate sanity on the default thresholds:
 
@@ -243,3 +247,73 @@ Aggregate verdict: a 9-bit bitmask encoded as `f32`. All pass ⇒ `511.0` /
 ## 8. Questions
 
 `ceo@star.ga` — happy to dig into any of this with you.
+
+---
+
+## Appendix A — measured 1 M-iteration sweep (i7-5930K)
+
+Verbatim output from `./xrm_mind_port --iter 1000000` on STARGA dev box,
+captured at build time of the prebuilt binaries shipped in `bin/`. Wall
+time: 1 m 43 s. Single-threaded. Identical evidence chain root reproduced
+on second run.
+
+```
+XRM-SSD + MIND hybrid bench (STARGA xrm_mind_port v0.1.0)
+  gov9 invariants ported from src/gov9.mind (see PORTED_FROM comments)
+  MIND kernel proof-of-life: run sibling binary ./libxrmgov
+----------------------------------------------------------------
+iter=1000000 batch=128 features=16 seed=0x58524d5f53534420
+
+  ratio |          TPS |     passed |     failed | evidence_root
+--------+--------------+------------+------------+----------------
+     1% |     47024.11 |     990005 |       9995 | 6cc49ca202fd5257
+     5% |     46834.48 |     950150 |      49850 | b9d6432b2896a8f6
+    10% |     48287.07 |     900306 |      99694 | 308723283ffd7bd7
+    25% |     49345.05 |     749613 |     250387 | 4dfc792733c3d39c
+    50% |     51271.38 |     499199 |     500801 | 827c924ec8d61dca
+
+sweep evidence chain root: 268c6de079d2f39bced1ad93f41c7aaeb4c07f85124abbd357e35d7492ab9783
+
+Replay: same binary + same args ⇒ byte-identical root.
+```
+
+Pass-rate columns track the intervention ratio cleanly (~1 %, 5 %, 10 %,
+25 %, 50 % unhealthy batches), which confirms the nine invariants are all
+firing as intended on healthy data. The sustained TPS is roughly
+constant across the sweep because every iteration runs the full nine-
+invariant tick whether the batch is healthy or not — only the bitmask
+result differs.
+
+---
+
+## Appendix B — leak audit transcript (libxrmgov, post-build)
+
+For full reproducibility of the protection claim. Run this on your copy
+to confirm no MIND source / IR / build path leaks through:
+
+```bash
+cd improved/bin
+
+# 1. No source-embedding symbols
+nm libxrmgov | grep -E '(get_source|get_ir|MIND_MODULE|MIND_SOURCE|MIND_IR)'
+# (no output)
+
+# 2. No plaintext .mind source
+strings libxrmgov | grep -cE 'fn (inv|gov9|main)|tensor<f32|tensor\.zeros|sum_all|min_all|select\('
+# 0
+
+# 3. No build-host paths
+strings libxrmgov | grep -cE '/home/|\.nikolachess|\.cargo/registry'
+# 0
+
+# 4. .comment carries MIND attribution only
+objcopy --dump-section .comment=/dev/stdout libxrmgov | tr -d '\0'
+# MIND: mind 0.2.3 (STARGA toolchain)
+
+# 5. RPATH contains $ORIGIN only
+readelf -d libxrmgov | grep -E 'RPATH|RUNPATH'
+# 0x000000000000001d (RUNPATH)            Library runpath: [$ORIGIN]
+```
+
+These five checks are what `build.sh` runs in stage 6 before writing
+`SHA256SUMS`. Build aborts non-zero if any one of them fails.
