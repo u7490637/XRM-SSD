@@ -48,6 +48,7 @@ Expected output shape (with `--threads 5`):
 XRM-SSD + MIND hybrid bench (STARGA xrm_mind_port v0.2.0)
   gov9 invariants ported from src/gov9.mind (see PORTED_FROM comments)
   MIND kernel proof-of-life: run sibling binary ./libxrmgov
+  self-hash: <SHA-256 of /proc/self/exe — must match SHA256SUMS>
 ----------------------------------------------------------------
 iter=1000000 batch=128 features=16 threads=5 seed=0x58524d5f53534420
 
@@ -98,6 +99,41 @@ If you see wildly lower pass rates at low intervention, the `inv9` replay
 fence may be tripping under your hardware's f32 rounding — open an issue,
 we tuned the relative tolerance against x86_64 default reductions.
 
+### Runtime protection (why an exit code 137 means)
+
+`xrm_mind_port` is a sealed release binary. Before any bench logic runs,
+`protection::enforce()` executes a short checklist and aborts with exit
+code 137 (prints nothing to keep an attacker from learning which check
+tripped):
+
+| Check | Trips on |
+|---|---|
+| Tracer attached | `/proc/self/status` `TracerPid != 0` (`gdb`, `strace -p`, rr, ltrace, a debugger-IDE attached to the PID) |
+| Injection env vars | `LD_PRELOAD`, `LD_AUDIT`, `LD_PROFILE`, `LD_DEBUG` set (any non-empty value) |
+| Dumpable | `prctl(PR_SET_DUMPABLE, 0)` — no core dumps, `/proc/self/mem` locked to root |
+| Self-attach | `ptrace(PTRACE_TRACEME, 0, 0, 0)` at the end of `enforce()` — any later `ptrace(PTRACE_ATTACH, ...)` fails |
+
+The binary also prints a `self-hash: <sha256>` line at startup; this must
+match the value in `bin/SHA256SUMS`. If your run is returning exit 137 or
+exiting before the sweep starts, check:
+
+```bash
+env | grep -E '^LD_(PRELOAD|AUDIT|PROFILE|DEBUG)='   # must be empty
+awk '/TracerPid:/ {print $2}' /proc/self/status      # must be 0 in your shell
+```
+
+and re-run from a clean shell:
+
+```bash
+env -i PATH=/usr/bin:/bin HOME=/tmp ./xrm_mind_port --iter 100000
+```
+
+None of these checks are strictly required for the bench itself — they
+are the same posture applied to every STARGA release binary (NikolaChess
+class). If you need to debug the harness locally (e.g. `perf record`,
+`strace`), rebuild from source in stage-5 cargo with the `unprotected`
+feature: that compiles `protection.rs` to a no-op.
+
 ---
 
 ## 2. Verify binary integrity
@@ -135,7 +171,7 @@ cd improved
 ./build.sh
 ```
 
-`build.sh` is a six-stage protected build pipeline:
+`build.sh` is a seven-stage protected build pipeline:
 
 1. **mindc compile.** `mindc build --release --target cpu` compiles
    `src/lib.mind` + `src/gov9.mind` into a CPU-target ELF under
@@ -165,7 +201,74 @@ cd improved
 6. **Leak audit + SHA-256.** `strings` is rerun against the protected
    `libxrmgov` for four leak categories (MIND syntax, comment markers,
    build paths, MIND module symbols). Build aborts non-zero if any
-   pattern is found. Both binaries are hashed into `bin/SHA256SUMS`.
+   pattern is found.
+7. **Full-protection hardening (`protection/harden.sh`).** Applied to
+   all three shipped binaries in one pass:
+   - Removes `.note.gnu.build-id`, `.note.gnu.property`, `.note.ABI-tag`
+     from every ELF (strips per-link fingerprints and x86 ISA markers).
+   - Strips every dynamic symbol from `libmind_cpu_linux-x64.so` except
+     `mind_main`. Post-hoc equivalent of a version-script link with
+     `{ global: mind_main; local: *; }` (see
+     `protection/exports.map`).
+   - Nukes `.comment` on `xrm_mind_port`, which by default leaks the
+     full `rustc 1.93.1 / LLD 21.1.8 / GCC 13.3.0` triplet; re-injects
+     the same `MIND: mind 0.2.3 (STARGA toolchain)` line used on the
+     MIND-compiled binaries.
+   - Zeroes every `/rustc/<hash>/library/...` and `/home/n/...` string
+     baked into `.rodata` by rustc panic-location tables and internal
+     build paths (23 strings in `libmind`, 12 in `xrm_mind_port`).
+   - Re-runs `strings` against every binary with a pattern list
+     (`rustc version`, `LLD [0-9]`, `Ubuntu [0-9]+`, `GCC: \(`, `/home/`,
+     `.cargo/registry`, `/rustc/`); build fails if anything matches.
+   - Writes `bin/SHA256SUMS` against the final, hardened artifacts.
+
+### Runtime protection (applied to `xrm_mind_port` from `src/protection.rs`)
+
+Called from `main()` **before any bench logic**; any tripped check exits
+with code 137 and no diagnostic output:
+
+| Check | Mechanism |
+|---|---|
+| LD_PRELOAD / LD_AUDIT / LD_PROFILE / LD_DEBUG | env scan, abort on any set |
+| Undumpable | `prctl(PR_SET_DUMPABLE, 0)` — no core dumps, non-root `/proc/self/mem` blocked |
+| Initial `TracerPid` | reads `/proc/self/status`, abort if `!= 0` |
+| `PTRACE_TRACEME` | armed last; future `ptrace(ATTACH)` from any debugger traps |
+| Self-hash attestation | SHA-256 of `/proc/self/exe` printed on startup; matches `bin/SHA256SUMS` |
+
+Link-time hardening (`.cargo/config.toml` rustflags):
+
+- `-Wl,--build-id=none` — no per-link fingerprint
+- `-Wl,-z,noexecstack` — non-executable stack
+- `-Wl,-z,relro -Wl,-z,now` — full relro + eager binding
+- `-Wl,--gc-sections` — unused sections dropped
+- `-Wl,--as-needed` — unused `DT_NEEDED` entries dropped
+- `-Wl,-rpath,$ORIGIN` — finds sibling MIND runtime without `LD_LIBRARY_PATH`
+- `-Cstrip=symbols` — every symbol table entry stripped
+
+Verify from your copy:
+
+```bash
+cd improved/bin
+
+# 1. No build fingerprint on any ELF
+readelf -n xrm_mind_port libmind_cpu_linux-x64.so libxrmgov | grep -c "Build ID"
+# → 0
+
+# 2. Anti-debug trips under strace/gdb
+strace -f ./xrm_mind_port --iter 100 2>&1 | tail -3
+# → ptrace(PTRACE_TRACEME) = -1 EPERM
+# → +++ exited with 137 +++
+
+# 3. Self-hash in the banner matches SHA256SUMS
+sha256sum xrm_mind_port
+./xrm_mind_port --iter 1000 | grep self-hash
+# → same hex both times
+
+# 4. No rustc / LLD / GCC / build-path strings
+strings xrm_mind_port libmind_cpu_linux-x64.so libxrmgov \
+  | grep -cE 'rustc version|LLD [0-9]+|Ubuntu|GCC:|/home/|\.cargo/registry|/rustc/'
+# → 0
+```
 
 ### Rust-only rebuild (no `mindc` needed)
 
@@ -218,7 +321,7 @@ What each test proves:
 improved/
 ├── Mind.toml                # mindc build config with [protection] block
 ├── Cargo.toml               # Rust bench harness config
-├── build.sh                 # 6-stage protected build pipeline
+├── build.sh                 # 7-stage protected build pipeline
 ├── src/
 │   ├── gov9.mind            # MIND source: 9 governance invariants as
 │   │                        #              tensor reductions (reference)
@@ -227,9 +330,16 @@ improved/
 │                            # mapping each Rust function to its gov9.mind
 │                            # counterpart line-for-line
 ├── bin/
-│   ├── libxrmgov            # Prebuilt mindc-compiled binary (stripped)
-│   ├── xrm_mind_port        # Prebuilt Rust bench harness (stripped, LTO)
+│   ├── libxrmgov            # Prebuilt mindc-compiled MIND kernel (stripped, hardened)
+│   ├── libmind_cpu_linux-x64.so  # MIND runtime (bundled, only mind_main exported)
+│   ├── xrm_mind_port        # Prebuilt Rust bench harness (stripped, LTO, hardened)
 │   └── SHA256SUMS           # Integrity hashes
+├── protection/
+│   ├── exports.map          # Version script: locks libmind to {mind_main; local *;}
+│   ├── harden.sh            # Stage-7 hardening: strips notes, zeroes rustc/.cargo
+│   │                        #                    paths, enforces MIND .comment across
+│   │                        #                    every shipped binary
+│   └── README.md            # What gets protected and what does not
 ├── tests/
 │   ├── determinism.rs       # 3 tests: replay identity, thread identity, chain coverage
 │   └── invariants.rs        # 2 tests: per-ratio pass rate bands + TPS healthy
@@ -322,6 +432,7 @@ runs produce the *same* sweep evidence chain root — the only thing
 XRM-SSD + MIND hybrid bench (STARGA xrm_mind_port v0.2.0)
   gov9 invariants ported from src/gov9.mind (see PORTED_FROM comments)
   MIND kernel proof-of-life: run sibling binary ./libxrmgov
+  self-hash: <SHA-256 of /proc/self/exe — must match SHA256SUMS>
 ----------------------------------------------------------------
 iter=1000000 batch=128 features=16 threads=1 seed=0x58524d5f53534420
 
@@ -346,6 +457,7 @@ Replay: same binary + same args ⇒ byte-identical root.
 XRM-SSD + MIND hybrid bench (STARGA xrm_mind_port v0.2.0)
   gov9 invariants ported from src/gov9.mind (see PORTED_FROM comments)
   MIND kernel proof-of-life: run sibling binary ./libxrmgov
+  self-hash: <SHA-256 of /proc/self/exe — must match SHA256SUMS>
 ----------------------------------------------------------------
 iter=1000000 batch=128 features=16 threads=5 seed=0x58524d5f53534420
 

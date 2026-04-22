@@ -20,6 +20,20 @@ use rand_chacha::ChaCha20Rng;
 use sha2::{Digest, Sha256};
 use std::time::Instant;
 
+#[cfg(feature = "protected")]
+mod protection;
+
+// Stub shim so callers don't need to #[cfg]-guard every site. With
+// `--no-default-features`, every call turns into a no-op and the binary
+// is freely debuggable.
+#[cfg(not(feature = "protected"))]
+mod protection {
+    pub fn enforce() {}
+    pub fn self_hash() -> [u8; 32] {
+        [0u8; 32]
+    }
+}
+
 // ---------------------------------------------------------------------------
 // Config
 // ---------------------------------------------------------------------------
@@ -323,11 +337,16 @@ fn run_sweep_parallel(args: &Args) -> Vec<(u32, BenchResult)> {
 }
 
 fn main() {
+    // Protection: anti-debug + undumpable + PTRACE_TRACEME before any logic.
+    protection::enforce();
+    let attest = protection::self_hash();
+
     let args = parse_args();
 
     println!("XRM-SSD + MIND hybrid bench (STARGA xrm_mind_port v0.2.0)");
     println!("  gov9 invariants ported from src/gov9.mind (see PORTED_FROM comments)");
     println!("  MIND kernel proof-of-life: run sibling binary ./libxrmgov");
+    println!("  self-hash: {}", hex(&attest));
     println!("----------------------------------------------------------------");
     println!(
         "iter={} batch={} features={} threads={} seed=0x{:016x}",

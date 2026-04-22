@@ -35,7 +35,7 @@ fi
 OUT="bin"
 mkdir -p "${OUT}"
 
-echo "==> [1/6] mindc compile src/lib.mind + src/gov9.mind"
+echo "==> [1/7] mindc compile src/lib.mind + src/gov9.mind"
 rm -rf target/obj target/release 2>/dev/null || true
 MIND_LIB_PATH="${MIND_LIB_DIR}" "${MINDC}" build --release --target cpu 2>&1 | sed 's/^/   /'
 
@@ -49,7 +49,7 @@ echo "   mindc emitted: ${MIND_ELF}"
 cp "${MIND_ELF}" "${OUT}/libxrmgov"
 
 # ---------------------------------------------------------------------------
-echo "==> [2/6] Strip source-embedding symbols (get_source / get_ir / SOURCE / IR)"
+echo "==> [2/7] Strip source-embedding symbols (get_source / get_ir / SOURCE / IR)"
 SYMS=$(nm "${OUT}/libxrmgov" 2>/dev/null | \
     grep -E "(mind_module_.*_(get_source|get_ir)|MIND_(MODULE_.*_)?(SOURCE|IR)(_lib)?)" | \
     awk '{print $NF}' | sort -u || true)
@@ -61,7 +61,7 @@ if [[ -n "${SYMS}" ]]; then
 fi
 
 # ---------------------------------------------------------------------------
-echo "==> [3/6] Zero source / path / IR strings in .rodata"
+echo "==> [3/7] Zero source / path / IR strings in .rodata"
 python3 <<'PY'
 import re, struct, subprocess
 
@@ -133,7 +133,7 @@ print(f"   zeroed {zeroed} source/path strings in .rodata "
 PY
 
 # ---------------------------------------------------------------------------
-echo "==> [4/6] Normalize RPATH and replace .comment with MIND attribution"
+echo "==> [4/7] Normalize RPATH and replace .comment with MIND attribution"
 if command -v patchelf >/dev/null 2>&1; then
     patchelf --set-rpath '$ORIGIN' "${OUT}/libxrmgov"
     echo "   RPATH set to \$ORIGIN"
@@ -167,14 +167,14 @@ fi
 
 
 # ---------------------------------------------------------------------------
-echo "==> [5/6] cargo build --release (Rust harness)"
+echo "==> [5/7] cargo build --release (Rust harness)"
 # Separate target dir so mindc's target/release wipe doesn't corrupt cargo cache.
 "${CARGO}" build --release --target-dir target-rust 2>&1 | sed 's/^/   /'
 cp target-rust/release/xrm_mind_port "${OUT}/xrm_mind_port"
 strip "${OUT}/xrm_mind_port" 2>/dev/null || true
 
 # ---------------------------------------------------------------------------
-echo "==> [6/6] Leak verification + SHA-256"
+echo "==> [6/7] Leak verification + SHA-256"
 LEAKS=0
 check() {
     local label="$1" pattern="$2"
@@ -203,7 +203,20 @@ COMMENT=$(objcopy --dump-section .comment=/dev/stdout "${OUT}/libxrmgov" 2>/dev/
             | tr -d '\0' || true)
 echo "   .comment: ${COMMENT}"
 
-(cd "${OUT}" && sha256sum libmind_cpu_linux-x64.so libxrmgov xrm_mind_port > SHA256SUMS)
+# ---------------------------------------------------------------------------
+# Stage 7: Full protection hardening across every shipped binary.
+#   - Strip .note.gnu.build-id / .note.gnu.property / .note.ABI-tag
+#   - Overwrite .comment with a single MIND attribution line
+#   - Zero /rustc/... and /home/... build-path strings in .rodata
+#   - Lock libmind_cpu_linux-x64.so exports down to mind_main
+# See protection/harden.sh for the full pipeline.
+echo "==> [7/7] Full protection hardening (protection/harden.sh)"
+if [[ -x "protection/harden.sh" ]]; then
+    protection/harden.sh 2>&1 | sed 's/^/   /'
+else
+    echo "   WARN: protection/harden.sh missing or not executable — skipping"
+    (cd "${OUT}" && sha256sum libmind_cpu_linux-x64.so libxrmgov xrm_mind_port > SHA256SUMS)
+fi
 echo
 echo "Build complete:"
 ls -la "${OUT}/"
