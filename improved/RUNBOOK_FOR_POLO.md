@@ -6,7 +6,7 @@ no STARGA-internal toolchain. Two binaries ship:
 | Binary | Size | What it proves |
 |---|---|---|
 | `bin/libxrmgov` | ~18 KB | `mindc`-compiled executable that loads and runs the MIND runtime. Source parses, tensor ops execute, binary is stripped of `mind_module_*_get_source` symbols. Proof the MIND kernel compiles and runs on your L4 host. |
-| `bin/xrm_mind_port` | ~375 KB | Rust bench harness. Reimplements the same nine governance invariants from `src/gov9.mind` line-for-line (see `PORTED_FROM:` comments in `src/main.rs`). This is the **measurable** bench — it emits a TPS table per intervention ratio and a SHA-256 evidence chain root. Byte-identical across runs. |
+| `bin/xrm_mind_port` | ~400 KB | Rust bench harness. Reimplements the same nine governance invariants from `src/gov9.mind` line-for-line (see `PORTED_FROM:` comments in `src/main.rs`). This is the **measurable** bench — it emits a TPS table per intervention ratio and a SHA-256 evidence chain root. Byte-identical across runs, byte-identical regardless of `--threads`. |
 
 Both binaries ship prebuilt. You can also rebuild from source; see §3.
 
@@ -24,25 +24,33 @@ LD_LIBRARY_PATH=/home/n/.nikolachess/lib ./libxrmgov
 # bench below does not require it.
 
 # Bench harness (the real measurement):
-./xrm_mind_port                                   # defaults: iter=1M batch=128 features=16
+./xrm_mind_port                                   # defaults: iter=1M batch=128 features=16 threads=1
 ./xrm_mind_port --iter 100000 --batch 64          # shorter smoke test
 ./xrm_mind_port --iter 5000000 --batch 256        # longer run
+./xrm_mind_port --threads 5                       # fan the 5 ratios out across 5 worker threads
+./xrm_mind_port --threads 12 --iter 5000000       # full L4 host: 12+ cores, deeper sweep
 ./xrm_mind_port --help                            # usage
 
 # Determinism check — run twice, confirm the evidence root is identical:
 ./xrm_mind_port --iter 100000 | tail -2
 ./xrm_mind_port --iter 100000 | tail -2
 # Both runs ⇒ same SHA-256. Bit-identical replay.
+
+# Determinism across thread counts — the sweep evidence root must NOT
+# change just because you switched on parallel ratios:
+./xrm_mind_port --iter 100000 --threads 1 | grep "sweep evidence"
+./xrm_mind_port --iter 100000 --threads 5 | grep "sweep evidence"
+# Both lines ⇒ identical hex. --threads only affects wall-clock time.
 ```
 
-Expected output shape:
+Expected output shape (with `--threads 5`):
 
 ```
-XRM-SSD + MIND hybrid bench (STARGA xrm_mind_port v0.1.0)
+XRM-SSD + MIND hybrid bench (STARGA xrm_mind_port v0.2.0)
   gov9 invariants ported from src/gov9.mind (see PORTED_FROM comments)
   MIND kernel proof-of-life: run sibling binary ./libxrmgov
 ----------------------------------------------------------------
-iter=1000000 batch=128 features=16 seed=0x58524d5f53534420
+iter=1000000 batch=128 features=16 threads=5 seed=0x58524d5f53534420
 
   ratio |          TPS |     passed |     failed | evidence_root
 --------+--------------+------------+------------+----------------
@@ -53,19 +61,28 @@ iter=1000000 batch=128 features=16 seed=0x58524d5f53534420
     50% |      ... TPS |        ... |        ... | <16-hex-prefix>
 
 sweep evidence chain root: <full 32-byte SHA-256 hex>
+wall: <s>   aggregate sweep TPS: <T>   threads: 5
 
 Replay: same binary + same args ⇒ byte-identical root.
+--threads only changes wall-time; per-ratio numbers are independent.
 ```
 
-Measured on STARGA dev box (i7-5930K @ 3.5 GHz, single core, no GPU):
-**~46–51 K TPS sustained** across the sweep on a full 1 M-iteration run
-(see Appendix A for the actual log). 9-invariant governance tick per
-iteration, identical evidence chain root across two consecutive runs.
-On your L4 host the CPU side is a Xeon Platinum / Sapphire Rapids class
-core — expect roughly 2–3× higher TPS on this path since it is purely
-CPU-bound. The harness is single-threaded by design (the determinism
-fence requires a stable accumulator order); a multi-threaded variant
-that fans out per-ratio is straightforward and can be added if useful.
+Measured on STARGA dev box (i7-5930K @ 3.5 GHz, 12 logical cores, no GPU)
+on a full 1 M-iteration sweep (Appendix A has the verbatim logs):
+
+| Mode            | Wall time | Per-ratio TPS | Aggregate sweep TPS |
+|-----------------|-----------|---------------|---------------------|
+| `--threads 1`   | 97.06 s   | ~50–54 K      | 51,517              |
+| `--threads 5`   | 20.43 s   | ~49–54 K      | 244,762             |
+
+4.75× wall-time speedup on five worker threads. Per-ratio TPS unchanged
+(each ratio still runs single-threaded internally so the inv9 replay
+fence stays valid). Identical sweep evidence chain root in both modes:
+`268c6de079d2f39bced1ad93f41c7aaeb4c07f85124abbd357e35d7492ab9783`.
+That is the load-bearing claim of this harness — `--threads` is a
+wall-time knob, not a math knob. Polo's L4 host (Sapphire Rapids class,
+12+ cores) should see ~1.5–2× higher per-ratio TPS than the i7-5930K
+above, plus the same parallel speedup at `--threads 5+`.
 
 Pass-rate sanity on the default thresholds:
 
@@ -151,9 +168,44 @@ cd improved
 
 ```bash
 cd improved
-cargo build --release
-./target/release/xrm_mind_port --iter 100000
+cargo build --release --target-dir target-rust
+./target-rust/release/xrm_mind_port --iter 100000
 ```
+
+### Run the test suite
+
+Five integration tests validate the determinism guarantees end-to-end.
+All five must pass before a build is considered ready to ship:
+
+```bash
+cd improved
+cargo test --release --target-dir target-rust
+```
+
+Expected:
+
+```
+running 3 tests
+test thread_count_does_not_change_root ... ok
+test different_iter_count_changes_root ... ok
+test evidence_root_is_byte_identical_across_runs ... ok
+
+running 2 tests
+test all_ratios_produce_nonzero_tps ... ok
+test pass_rates_match_intervention_ratios ... ok
+
+test result: ok. 5 passed; 0 failed
+```
+
+What each test proves:
+
+| # | Test | Guarantee |
+|---|------|-----------|
+| 1 | `evidence_root_is_byte_identical_across_runs` | Replay gives byte-identical SHA-256 root |
+| 2 | `thread_count_does_not_change_root` | `--threads 1` and `--threads 5` produce identical roots |
+| 3 | `different_iter_count_changes_root` | Chain covers the work it claims to cover |
+| 4 | `all_ratios_produce_nonzero_tps` | Every sweep row hits > 1K TPS (pipeline healthy) |
+| 5 | `pass_rates_match_intervention_ratios` | Failed count matches intervention ratio within statistical band |
 
 ---
 
@@ -175,6 +227,10 @@ improved/
 │   ├── libxrmgov            # Prebuilt mindc-compiled binary (stripped)
 │   ├── xrm_mind_port        # Prebuilt Rust bench harness (stripped, LTO)
 │   └── SHA256SUMS           # Integrity hashes
+├── tests/
+│   ├── determinism.rs       # 3 tests: replay identity, thread identity, chain coverage
+│   └── invariants.rs        # 2 tests: per-ratio pass rate bands + TPS healthy
+├── .cargo/config.toml       # target-cpu=native flag for the Rust harness
 └── RUNBOOK_FOR_POLO.md      # This file
 ```
 
@@ -250,39 +306,82 @@ Aggregate verdict: a 9-bit bitmask encoded as `f32`. All pass ⇒ `511.0` /
 
 ---
 
-## Appendix A — measured 1 M-iteration sweep (i7-5930K)
+## Appendix A — measured 1 M-iteration sweep (i7-5930K, 12 cores)
 
-Verbatim output from `./xrm_mind_port --iter 1000000` on STARGA dev box,
-captured at build time of the prebuilt binaries shipped in `bin/`. Wall
-time: 1 m 43 s. Single-threaded. Identical evidence chain root reproduced
-on second run.
+Verbatim output from the prebuilt `bin/xrm_mind_port` shipped in this commit.
+Same binary, same args, two runs at different `--threads` counts. Both
+runs produce the *same* sweep evidence chain root — the only thing
+`--threads` changes is wall-clock time.
+
+### A.1 `--threads 1` (single-threaded baseline)
 
 ```
-XRM-SSD + MIND hybrid bench (STARGA xrm_mind_port v0.1.0)
+XRM-SSD + MIND hybrid bench (STARGA xrm_mind_port v0.2.0)
   gov9 invariants ported from src/gov9.mind (see PORTED_FROM comments)
   MIND kernel proof-of-life: run sibling binary ./libxrmgov
 ----------------------------------------------------------------
-iter=1000000 batch=128 features=16 seed=0x58524d5f53534420
+iter=1000000 batch=128 features=16 threads=1 seed=0x58524d5f53534420
 
   ratio |          TPS |     passed |     failed | evidence_root
 --------+--------------+------------+------------+----------------
-     1% |     47024.11 |     990005 |       9995 | 6cc49ca202fd5257
-     5% |     46834.48 |     950150 |      49850 | b9d6432b2896a8f6
-    10% |     48287.07 |     900306 |      99694 | 308723283ffd7bd7
-    25% |     49345.05 |     749613 |     250387 | 4dfc792733c3d39c
-    50% |     51271.38 |     499199 |     500801 | 827c924ec8d61dca
+     1% |     50220.90 |     990005 |       9995 | 6cc49ca202fd5257
+     5% |     50203.18 |     950150 |      49850 | b9d6432b2896a8f6
+    10% |     50852.97 |     900306 |      99694 | 308723283ffd7bd7
+    25% |     52107.29 |     749613 |     250387 | 4dfc792733c3d39c
+    50% |     54440.19 |     499199 |     500801 | 827c924ec8d61dca
 
 sweep evidence chain root: 268c6de079d2f39bced1ad93f41c7aaeb4c07f85124abbd357e35d7492ab9783
+wall: 97.06s   aggregate sweep TPS: 51516.86   threads: 1
 
 Replay: same binary + same args ⇒ byte-identical root.
+--threads only changes wall-time; per-ratio numbers are independent.
 ```
 
-Pass-rate columns track the intervention ratio cleanly (~1 %, 5 %, 10 %,
-25 %, 50 % unhealthy batches), which confirms the nine invariants are all
-firing as intended on healthy data. The sustained TPS is roughly
-constant across the sweep because every iteration runs the full nine-
-invariant tick whether the batch is healthy or not — only the bitmask
-result differs.
+### A.2 `--threads 5` (one worker per ratio)
+
+```
+XRM-SSD + MIND hybrid bench (STARGA xrm_mind_port v0.2.0)
+  gov9 invariants ported from src/gov9.mind (see PORTED_FROM comments)
+  MIND kernel proof-of-life: run sibling binary ./libxrmgov
+----------------------------------------------------------------
+iter=1000000 batch=128 features=16 threads=5 seed=0x58524d5f53534420
+
+  ratio |          TPS |     passed |     failed | evidence_root
+--------+--------------+------------+------------+----------------
+     1% |     48952.89 |     990005 |       9995 | 6cc49ca202fd5257
+     5% |     49593.72 |     950150 |      49850 | b9d6432b2896a8f6
+    10% |     49884.62 |     900306 |      99694 | 308723283ffd7bd7
+    25% |     51376.76 |     749613 |     250387 | 4dfc792733c3d39c
+    50% |     53651.99 |     499199 |     500801 | 827c924ec8d61dca
+
+sweep evidence chain root: 268c6de079d2f39bced1ad93f41c7aaeb4c07f85124abbd357e35d7492ab9783
+wall: 20.43s   aggregate sweep TPS: 244762.17   threads: 5
+
+Replay: same binary + same args ⇒ byte-identical root.
+--threads only changes wall-time; per-ratio numbers are independent.
+```
+
+### A.3 What to take away
+
+- **Per-ratio TPS** stayed in the ~49–54 K band in both runs. The 9-invariant
+  tick is a pure CPU-bound reduction over a 128 × 16 f32 batch (~2 KB), so
+  per-thread throughput is bounded by the L1 cache and the f32 ALU pipeline,
+  not by lock contention.
+- **Wall time** dropped 4.75× (97.06 s → 20.43 s) because the five ratios
+  run as five independent jobs.
+- **Evidence chain root** matched byte-for-byte: each per-ratio root and
+  the final sweep root are identical. That is the harness-level
+  determinism guarantee — same inputs, same outputs, regardless of how
+  many threads you fan the work out across.
+- **Pass-rate columns** track the intervention ratio cleanly. Anything
+  outside the bands in §1 means a workload-level invariant is firing
+  unexpectedly, not a determinism failure.
+
+On Polo's L4 host (12+ cores, AVX-512), `--threads 12` should hit
+~5–8× wall-time speedup (5 ratios fit in 5 of those threads; the rest
+are idle by design — extending to per-ratio block-Merkle parallelism
+is the next step if you want to push past that). Per-ratio TPS should
+be ~1.5–2× higher than the i7-5930K above on the same `--iter`.
 
 ---
 

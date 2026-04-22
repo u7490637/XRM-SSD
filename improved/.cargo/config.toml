@@ -1,0 +1,12 @@
+# Cargo build tuning for the xrm_mind_port harness.
+#
+# native target-cpu lets LLVM emit AVX2 / AVX-512 / FMA instructions when
+# Polo's L4 host (Sapphire Rapids class) supports them. The gov9 inner
+# loops are pure tensor reductions and autovectorize well with this hint.
+#
+# Override locally with:
+#   RUSTFLAGS="-C target-cpu=x86-64-v2" cargo build --release
+# if you want a portable binary instead of a host-tuned one.
+
+[build]
+rustflags = ["-C", "target-cpu=native"]

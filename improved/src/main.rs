@@ -236,6 +236,7 @@ struct Args {
     iter: usize,
     batch: usize,
     features: usize,
+    threads: usize,
 }
 
 fn parse_args() -> Args {
@@ -243,6 +244,7 @@ fn parse_args() -> Args {
         iter: DEFAULT_ITER,
         batch: DEFAULT_BATCH,
         features: DEFAULT_FEATURES,
+        threads: 1,
     };
     let mut it = std::env::args().skip(1);
     while let Some(flag) = it.next() {
@@ -250,10 +252,14 @@ fn parse_args() -> Args {
             "--iter" => a.iter = it.next().and_then(|s| s.parse().ok()).unwrap_or(a.iter),
             "--batch" => a.batch = it.next().and_then(|s| s.parse().ok()).unwrap_or(a.batch),
             "--features" => a.features = it.next().and_then(|s| s.parse().ok()).unwrap_or(a.features),
+            "--threads" => a.threads = it.next().and_then(|s| s.parse().ok()).unwrap_or(a.threads).max(1),
             "--help" | "-h" => {
                 println!(
-                    "usage: xrm_mind_port [--iter N] [--batch N] [--features N]\n\
-                     defaults: iter=1,000,000 batch=128 features=16"
+                    "usage: xrm_mind_port [--iter N] [--batch N] [--features N] [--threads N]\n\
+                     defaults: iter=1,000,000 batch=128 features=16 threads=1\n\
+                     --threads >1 fans the 5 ratios out across worker threads.\n\
+                     Per-ratio results are independent so the sweep evidence\n\
+                     chain root is identical regardless of thread count."
                 );
                 std::process::exit(0);
             }
@@ -271,24 +277,76 @@ fn hex(bytes: &[u8]) -> String {
     s
 }
 
+fn run_sweep_serial(args: &Args) -> Vec<(u32, BenchResult)> {
+    RATIOS_BPS
+        .iter()
+        .map(|&r| (r, bench_one(args.iter, r, args.batch, args.features)))
+        .collect()
+}
+
+fn run_sweep_parallel(args: &Args) -> Vec<(u32, BenchResult)> {
+    use std::sync::{Arc, Mutex};
+    use std::thread;
+
+    let work: Arc<Mutex<Vec<u32>>> = Arc::new(Mutex::new(RATIOS_BPS.iter().rev().copied().collect()));
+    let results: Arc<Mutex<Vec<(u32, BenchResult)>>> = Arc::new(Mutex::new(Vec::new()));
+    let n_workers = args.threads.min(RATIOS_BPS.len());
+
+    let mut handles = Vec::with_capacity(n_workers);
+    for _ in 0..n_workers {
+        let work = Arc::clone(&work);
+        let results = Arc::clone(&results);
+        let iter = args.iter;
+        let batch = args.batch;
+        let features = args.features;
+        handles.push(thread::spawn(move || loop {
+            let next = { work.lock().unwrap().pop() };
+            match next {
+                Some(ratio) => {
+                    let r = bench_one(iter, ratio, batch, features);
+                    results.lock().unwrap().push((ratio, r));
+                }
+                None => break,
+            }
+        }));
+    }
+    for h in handles {
+        h.join().unwrap();
+    }
+
+    let mut out = Arc::try_unwrap(results)
+        .unwrap_or_else(|_| panic!("results Arc still shared"))
+        .into_inner()
+        .unwrap();
+    out.sort_by_key(|(r, _)| *r);
+    out
+}
+
 fn main() {
     let args = parse_args();
 
-    println!("XRM-SSD + MIND hybrid bench (STARGA xrm_mind_port v0.1.0)");
+    println!("XRM-SSD + MIND hybrid bench (STARGA xrm_mind_port v0.2.0)");
     println!("  gov9 invariants ported from src/gov9.mind (see PORTED_FROM comments)");
     println!("  MIND kernel proof-of-life: run sibling binary ./libxrmgov");
     println!("----------------------------------------------------------------");
     println!(
-        "iter={} batch={} features={} seed=0x{:016x}",
-        args.iter, args.batch, args.features, SEED
+        "iter={} batch={} features={} threads={} seed=0x{:016x}",
+        args.iter, args.batch, args.features, args.threads, SEED
     );
     println!();
+
+    let wall_start = Instant::now();
+    let results = if args.threads <= 1 {
+        run_sweep_serial(&args)
+    } else {
+        run_sweep_parallel(&args)
+    };
+    let wall = wall_start.elapsed();
 
     let mut chain = Sha256::new();
     println!("  ratio |          TPS |     passed |     failed | evidence_root");
     println!("--------+--------------+------------+------------+----------------");
-    for &ratio in RATIOS_BPS {
-        let r = bench_one(args.iter, ratio, args.batch, args.features);
+    for (ratio, r) in &results {
         chain.update(&r.evidence_root);
         println!(
             "  {:>4}% | {:>12.2} | {:>10} | {:>10} | {}",
@@ -300,8 +358,17 @@ fn main() {
         );
     }
     let root: [u8; 32] = chain.finalize().into();
+    let total_iters: u64 = (args.iter as u64) * (RATIOS_BPS.len() as u64);
+    let agg_tps = total_iters as f64 / wall.as_secs_f64();
     println!();
     println!("sweep evidence chain root: {}", hex(&root));
+    println!(
+        "wall: {:.2}s   aggregate sweep TPS: {:.2}   threads: {}",
+        wall.as_secs_f64(),
+        agg_tps,
+        args.threads
+    );
     println!();
     println!("Replay: same binary + same args ⇒ byte-identical root.");
+    println!("--threads only changes wall-time; per-ratio numbers are independent.");
 }

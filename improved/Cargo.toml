@@ -1,6 +1,6 @@
 [package]
 name = "xrm_mind_port"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 authors = ["STARGA, Inc. <ceo@star.ga>"]
 description = "XRM-SSD + MIND hybrid bench harness"
