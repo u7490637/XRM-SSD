@@ -33,6 +33,13 @@ firmware/
   m2354/src/sha256.c       portable SHA-256 (host/CI parity with silicon)
   m2354/src/main.c         the demo loop
   host/rge_host.py         host-side reference — identical bytes + hash
+  mind-contract/           the MIND sources this C mirrors field-for-field
+    rge.mind               verify-only contract (structs + 13 invariants)
+    blend_run.mind         pull-model blend          -> folds to 32768
+    reduce_run.mind        N-edge weighted reduce
+    apply_run.mind         commit counters epoch/version + 1 -> folds to 8
+    chain_run.mind         evidence-chain mix        -> folds to 1615839279860409
+    m2354_kernel.mind      v2 skeleton: commit step composed + Armv8-M checklist
 ```
 
 ## Run it today (no hardware)
@@ -67,3 +74,20 @@ kernels for Armv8-M and confirm they fold **byte-identical** vs the host/FPGA
 path, making the M2354 a **third substrate** in the bit-identity proof — the
 secure one. That needs a Cortex-M codegen path we'd build; this C firmware is
 the reference the eventual MIND-emitted code must reproduce.
+
+The runnable MIND kernels in `mind-contract/` already fold to the exact values
+the C reproduces — run one on the host eval surface:
+
+```sh
+cd mind-contract
+mind eval --exec "$(grep -vE '^\s*//|^\s*$' blend_run.mind | tr '\n' ' ')"   # -> 32768
+mind eval --exec "$(grep -vE '^\s*//|^\s*$' apply_run.mind | tr '\n' ' ')"   # -> 8
+mind eval --exec "$(grep -vE '^\s*//|^\s*$' chain_run.mind | tr '\n' ' ')"   # -> 1615839279860409
+```
+
+`m2354_kernel.mind` is the skeleton the eventual Armv8-M backend lowers — the
+whole commit step composed in the runnable surface, with the honest build-out
+checklist (Cortex-M codegen, `>>16` lowering fix, `std.sha256` wiring, the
+cross-substrate gate that makes the M2354 substrate #3). `mind` here is the
+0.7.x source build (`~/mind/target/release/mind`); the rescale uses `/65536`
+not `>>16` per the gap noted in the kernel headers.

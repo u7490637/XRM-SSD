@@ -1,0 +1,91 @@
+// XRM-SSD RGE — M2354 (Armv8-M) cross-compile SKELETON  [v2 target shape]
+//
+// Copyright 2026 STARGA, Inc. / Dollarchip — XRM-SSD.
+//
+// ----------------------------------------------------------------------------
+// WHAT THIS FILE IS
+// ----------------------------------------------------------------------------
+// This is the SKELETON for the v2 milestone: cross-compiling the deterministic
+// RGE commit kernel to Armv8-M so the M2354 becomes a THIRD substrate in the
+// byte-identity proof — the secure one. It re-states the commit step entirely
+// in the runnable tensor-expression surface (the surface that actually folds
+// to values under `mind eval --exec`), composed from the already-verified
+// kernels in this directory:
+//
+//   reduce_run.mind  ->  new_state  = (w @ s) rescaled by 2^16   (pull-model blend)
+//   apply_run.mind   ->  new_epoch  = epoch   + 1                (total order)
+//                        new_version= version + 1
+//   chain_run.mind   ->  new_hash   = chain(prev_hash, mutation) (evidence anchor)
+//
+// The C firmware in ../m2354/src/rge.c is the hand-written mirror of exactly
+// this composition. When the Armv8-M codegen path exists, THIS file is what the
+// compiler lowers; the C is the reference its output must reproduce byte-for-byte.
+//
+// ----------------------------------------------------------------------------
+// HONEST GAP — read before building
+// ----------------------------------------------------------------------------
+// `mindc --target` is cpu|gpu ONLY today (x86-64 / AArch64 via MLIR->clang).
+// There is NO Armv8-M / thumbv8m backend on record. So:
+//   * The blocks below EXECUTE today on the host eval surface (they fold to the
+//     values noted) — that proves the kernel is deterministic and substrate-
+//     independent in arithmetic.
+//   * They DO NOT yet cross-compile to the M2354. That needs a Cortex-M codegen
+//     path to be built in the core. Until then the on-device half is the C in
+//     ../m2354/, and "MIND on the M2354" is a scoped build-out, not a flag.
+//
+// Two further gaps inherited from the kernels (unchanged here, documented so a
+// CLI agent does not trip on them):
+//   G-shift : `>>16` lowers to a bare `const 0` on 0.7.x — use `/ 65536` for the
+//             Q16.16 rescale. Sound over the [0,1] non-negative RGE domain.
+//   G-sha   : real SHA-256 lives on the std/scalar surface (std.sha256), not the
+//             tensor surface. chain_run here is the deterministic CHAINING
+//             STRUCTURE (multiply-add mix), a structural stand-in for the anchor;
+//             the production anchor is SHA-256 then Dilithium-3 + Kyber-768 wrap.
+//
+// ----------------------------------------------------------------------------
+// THE COMMIT STEP, COMPOSED  (folds today on the host eval surface)
+// ----------------------------------------------------------------------------
+// Worked end-to-end example at the convex-blend midpoint, matching rge.c:
+//
+//   w   = 0.5 -> 32768   a (src state) = 0.25 -> 16384   epoch_0   = 7
+//   inv = 0.5 -> 32768   b (src state) = 0.75 -> 49152   version_0 = 7
+//   d   = 65536 (rescale)                                  prev_hash = 1469598103
+//
+//   new_state   = (w*a + inv*b) / d        = 32768               (== rge_blend2)
+//   new_epoch   = epoch_0   + 1            = 8
+//   new_version = version_0 + 1            = 8
+//   new_hash    = prev_hash*K + new_state + new_epoch = 1615839279860409
+//
+// i64 dtype is LOAD-BEARING: w*a + inv*b reaches exactly 2^31 at this midpoint,
+// one past INT32_MAX — an i32 accumulator silently overflows (confirmed
+// empirically, see blend_run.mind). This is the same int64_t cast the C uses.
+
+// --- Stage 1: pull-model blend  -> 32768 -----------------------------------
+let w:   tensor<i64[2, 2]> = 32768
+let a:   tensor<i64[2, 2]> = 16384
+let inv: tensor<i64[2, 2]> = 32768
+let b:   tensor<i64[2, 2]> = 49152
+let d:   tensor<i64[2, 2]> = 65536
+(w * a + inv * b) / d
+
+// --- Stage 2 (apply_run.mind): [epoch, version] + 1 -> [8, 8] ---------------
+// --- Stage 3 (chain_run.mind): prev_hash*K + new_state + epoch -> 1615839279860409
+//
+// Stages 2 and 3 are evaluated in their own files in this directory (the host
+// eval surface folds one top-level expression per run). run them with:
+//
+//   mind eval --exec "$(grep -vE '^\s*//|^\s*$' apply_run.mind | tr '\n' ' ')"
+//   mind eval --exec "$(grep -vE '^\s*//|^\s*$' chain_run.mind | tr '\n' ' ')"
+//
+// All three fold to the constants the C firmware reproduces — which is the
+// host<->device byte-identity the demo's attestation rests on.
+//
+// ----------------------------------------------------------------------------
+// v2 BUILD-OUT CHECKLIST (for whoever opens this in the CLI)
+// ----------------------------------------------------------------------------
+//   [ ] Armv8-M (thumbv8m.base, cortex-m23) codegen path in the MIND core.
+//   [ ] Fixed `>>16` lowering so the natural Q16.16 rescale replaces `/65536`.
+//   [ ] std.sha256 on a surface reachable from the commit kernel (G-sha).
+//   [ ] Cross-substrate gate: host (x86-64/AArch64) vs M2354 fold byte-identical
+//       on this kernel -> the M2354 enters the bit-identity proof as substrate #3.
+//   [ ] Then: re-derivation on trusted silicon REPLACES attestation-by-equality.

@@ -70,6 +70,30 @@ in the bit-identity proof. That requires building a Cortex-M codegen path
 first. Until then, treat this C as the reference the eventual MIND output must
 reproduce — don't claim a MIND→M2354 cross-compile that doesn't exist.
 
+The actual MIND sources are in **`mind-contract/`**, and this C mirrors them
+field-for-field:
+
+- `rge.mind` — the VERIFY-ONLY contract: structs, bounds, node kinds, and all
+  13 fail-closed invariant predicates. `rge.h` / `rge.c` mirror it 1:1.
+- `blend_run.mind` — the pull-model blend, runnable. Folds to **32768**.
+- `reduce_run.mind` — the N-edge weighted reduce (pre-rescale accumulator).
+- `apply_run.mind` — the commit counters `[epoch, version] + 1`. Folds to **8**.
+- `chain_run.mind` — the evidence-chain mix (deterministic stand-in for the
+  SHA-256 anchor). Folds to **1615839279860409**.
+- `m2354_kernel.mind` — the **v2 skeleton**: the whole commit step composed in
+  the runnable surface, with the honest Armv8-M build-out checklist. This is
+  the file the eventual Cortex-M backend would lower; the C is its reference.
+
+Run a kernel on the host eval surface (folds to the value in its header):
+
+```sh
+cd mind-contract
+mind eval --exec "$(grep -vE '^\s*//|^\s*$' blend_run.mind | tr '\n' ' ')"
+```
+
+The fold values (32768 / 8 / 1615839279860409) are exactly what the C firmware
+reproduces — that equality is the host↔device byte-identity the demo rests on.
+
 ## Layout
 
 ```

@@ -1,0 +1,41 @@
+// XRM-SSD RGE — apply(g, m) -> g'  (the atomic commit, evaluable parts).
+//
+// rge.mind states the commit contract as predicates (verify-only). This file
+// expresses the parts of the commit that are NUMERIC and therefore evaluable
+// on the tensor surface, so the determinism-critical arithmetic produces real
+// foldable values rather than only a structural proof.
+//
+// A commit apply(g, m) -> g' produces three deterministic outputs:
+//   1. g'.node[m.target].state_q16 = the pull-model recompute   (see reduce_run.mind)
+//   2. g'.epoch                    = g.epoch   + 1              (epoch_advances_by_one)
+//   3. g'.node[m.target].version   = node.version + 1           (node_version_advances)
+//
+// (2) and (3) are the determinism-critical pair: they impose a TOTAL ORDER on
+// state changes without a firmware mutex. Each is an unconditional +1, so the
+// invariant is value-independent — the post-commit counter is exactly prior+1
+// no matter the starting value. Both fold in the preview evaluator.
+//
+// The PRE predicates that gate the commit (mutation_not_stale: from_epoch ==
+// epoch ; mutation_targets_live_node ; mutation_state_normalized) live in
+// rge.mind and fail closed; they are boolean guards, not arithmetic, so they
+// belong on the scalar contract surface, not here.
+//
+// Worked example: counters carried as a 2-vector [epoch, version]. Because the
+// eval surface initializes a tensor with a single broadcast fill, both lanes
+// share a value here (7) purely to show the +1 advance folds; in the real
+// graph the two lanes carry distinct epoch / version. The invariant proved is
+// the advance, which is identical on every lane.
+//
+//   [epoch, version] = [7, 7]   ->   + [1, 1]   ->   [8, 8]
+//
+// VERIFIED (preview, no feature build): folds to 8 = 7 + 1.
+//
+// Composed commit, end to end:
+//   new_state  = (w @ s) >> 16            (reduce_run.mind; >>16 gated on cpu-exec)
+//   new_epoch  = epoch   + 1              (here; folds)
+//   new_version= version + 1              (here; folds)
+//   new_hash   = chain(prev_hash, m)      (chain_run.mind; folds)
+
+let counters: tensor<i64[2]> = 7
+let advance: tensor<i64[2]> = 1
+counters + advance

@@ -1,0 +1,45 @@
+// XRM-SSD RGE — N-edge weighted reduce (the pull-model recompute, generalized).
+//
+// blend_run.mind proves the two-edge fold. This generalizes it to the real
+// RGE operation: a node's next state is the weighted sum over ALL its inbound
+// edges, then rescaled. That is a dot product of the inbound edge-weight
+// vector with the source-state vector — exactly w · s.
+//
+//   state'_raw = ( Σ_i  w_i_raw * s_i_raw ) >> 16
+//
+// Two equivalent surface forms below; both lower to canonical IR on mind 0.7.0.
+//
+// FORM A — matmul (canonical). A row vector of N edge weights times a column
+// vector of N source states lowers to a SINGLE `matmul` node. That maps 1:1
+// onto the heterogeneous core's MAC hardware (45-TOPS NPU / 1.2M-LUT FPGA),
+// which is the operation those units exist to do — so the reduce is one
+// deterministic primitive, not an unrolled loop the substrates could reorder.
+//
+// FORM B — (w * s).sum() : the explicit elementwise-mul + axis reduction,
+// lowering to `mul ; sum axes=[] keepdims=false`. Same value, shows the
+// decomposition.
+//
+// Q16.16, i64. Worked example — 4 inbound edges of a convex combination
+// (the weights sum to 1.0, the pull-model normalization invariant):
+//
+//   each w_i = 0.25 -> 16384 raw   (Σ w_i = 1.0  -> 65536 raw)
+//   each s_i = 0.5  -> 32768 raw
+//   pre-rescale accumulator Σ w_i_raw s_i_raw = 4 · 16384 · 32768 = 2^31
+//                                              = 2147483648
+//   state'_raw = 2^31 >> 16 = 32768 = 0.5    (correct: convex mean of 0.5s)
+//
+// VERIFIED NUMERICALLY (preview evaluator, no feature build): both forms fold
+// to the pre-rescale accumulator 2147483648 = 2^31. The >>16 rescale is the
+// single op the preview does not constant-fold (same gap as blend_run); the
+// final 32768 needs a `--features cpu-exec` build, which is operator-gated.
+//
+// i64 IS LOAD-BEARING — and this kernel proves it sharper than the 2-edge case:
+// the accumulator is exactly 2^31 = 2147483648, which is ONE past the signed
+// i32 maximum (2147483647). An i32 reduce silently wraps to -2147483648 and the
+// node state inverts. On an autonomous on-orbit node a silent sign flip in the
+// state recompute is a survivability bug, not a rounding nuance. (See
+// docs/CODEGEN_ASKS.md ask #1: i64-by-default for Q16.16 multiply-reduce.)
+
+let w: tensor<i64[1, 4]> = 16384
+let s: tensor<i64[4, 1]> = 32768
+w @ s

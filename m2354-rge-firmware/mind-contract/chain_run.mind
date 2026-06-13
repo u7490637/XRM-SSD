@@ -1,0 +1,45 @@
+// XRM-SSD RGE — chain(prev_hash, m) -> state_hash  (the evidence anchor).
+//
+// Each committed epoch produces a state_hash that deterministically folds the
+// prior epoch's hash with the mutation just applied:
+//
+//   g'.state_hash = chain(g.state_hash, m)
+//
+// This mirrors MIND's provenance shape, trace_hash = SHA-256(canonical mic@1):
+// a hash chained per step so the full state history is a tamper-evident log,
+// and the rollback window (ROLLBACK_DEPTH = 3, Polo-confirmed) is the last 3
+// links of that chain.
+//
+// PRODUCTION PRIMITIVE: the real anchor is SHA-256 over the canonical state
+// encoding (per-epoch chain records use SHA-256; the final evidence bundle is
+// then wrapped with Dilithium-3 + Kyber-768 — Polo, 2026-05-31). SHA-256 lives
+// on the scalar / std surface (std.sha256), NOT the tensor-expression surface
+// used here, so this file does NOT compute SHA-256.
+//
+// What this file DOES prove: the CHAINING STRUCTURE is deterministic and
+// evaluable. The mix below folds (prev_hash, new_state, epoch) into the next
+// link via a multiply-add — the same dependency shape as the real chain
+// (next link depends on prior hash + committed mutation), and it folds to a
+// concrete value in the preview evaluator. It is a STRUCTURAL STAND-IN for the
+// SHA-256 anchor, not a cryptographic hash. Substituting std.sha256 on the
+// contract surface is a drop-in once that surface is wired.
+//
+// Worked example (FNV-style offset basis as the seed, illustrative):
+//   prev_hash = 1469598103
+//   K         = 1099511        (mix multiplier)
+//   new_state = 32768          (the just-committed Q16.16 node state)
+//   epoch     = 8              (the post-commit epoch from apply_run.mind)
+//
+//   state_hash = prev_hash * K + new_state + epoch
+//              = 1469598103 * 1099511 + 32768 + 8
+//              = 1615839279860409
+//
+// VERIFIED (preview, no feature build): folds to 1615839279860409.
+// Determinism: the mix is pure integer multiply-add, identical across
+// substrates — the cross-substrate byte-identity the state_hash must have.
+
+let prev_hash: tensor<i64[1]> = 1469598103
+let k: tensor<i64[1]> = 1099511
+let new_state: tensor<i64[1]> = 32768
+let epoch: tensor<i64[1]> = 8
+prev_hash * k + new_state + epoch
