@@ -1,0 +1,59 @@
+name: M2354 RGE host↔device parity
+
+# Proves the C firmware and the Python host reference produce byte-identical
+# per-epoch SHA-256 hashes. That equality IS the attestation property the
+# demo rests on — so a drift between the two must fail the build, not pass
+# silently. Runs on every push/PR that touches the firmware.
+
+on:
+  push:
+    paths:
+      - 'm2354-rge-firmware/**'
+      - '.github/workflows/parity.yml'
+  pull_request:
+    paths:
+      - 'm2354-rge-firmware/**'
+      - '.github/workflows/parity.yml'
+  workflow_dispatch:
+
+jobs:
+  parity:
+    name: host vs device SHA-256 parity
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: m2354-rge-firmware
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Build firmware (host, -Wall -Wextra)
+        run: make host
+
+      - name: Run firmware + host reference, assert byte-identity
+        run: |
+          set -euo pipefail
+          ./rge_demo_host        > device.out
+          python3 host/rge_host.py > host.out
+
+          # Extract just the per-epoch hash lines from each, in order.
+          grep -oE '[0-9a-f]{64}' device.out > device.hashes
+          grep -oE '[0-9a-f]{64}' host.out   > host.hashes
+
+          echo "=== device (C firmware) hashes ==="; cat device.hashes
+          echo "=== host (Python reference) hashes ==="; cat host.hashes
+
+          if [ ! -s device.hashes ]; then
+            echo "FAIL: no SHA-256 hashes emitted by the firmware" >&2
+            exit 1
+          fi
+
+          if ! diff -u host.hashes device.hashes; then
+            echo "FAIL: host and device epoch hashes diverged — attestation broken" >&2
+            exit 1
+          fi
+
+          echo "PASS: host and device epoch hashes are byte-identical."
