@@ -1,0 +1,166 @@
+// Copyright 2026 STARGA, Inc.
+// STARGA Commercial License.
+//
+// XRM-SSD Runtime Graph Engine (RGE) — MIND port, first cut.
+//
+// Re-expresses the RGE state model from XRM-SSD V24.4.1 (Design Book
+// Ch.5.1 / White Paper Ch.4.1) as a deterministic Q16.16 contract.
+// Goal of the port: the RGE's two load-bearing guarantees —
+//   (a) atomic, epoch-ordered state mutation, and
+//   (b) a signed, rollback-capable audit trail
+// come from the compiler + evidence chain, not from runtime
+// bookkeeping. That yields bit-identical graph evolution across the
+// heterogeneous on-orbit core (NPU / FPGA / RISC-V).
+//
+// All node/edge magnitudes are Q16.16 fixed-point (raw << 16), the
+// same representation MIND uses for cross-substrate byte-identity.
+//
+// Status under mind 0.7.0 (fresh source build; the PATH-default install
+// is the older 0.1.7 whose parser predates the `#[protection]` module
+// attribute, so this contract is 0.7.0-only). This module is a
+// VERIFY-ONLY contract (type alias + consts + structs + invariant
+// predicates). The C-style scalar `fn` surface used here does NOT lower
+// to executable IR on the open-core build — function bodies emit a
+// placeholder `output 0`. The runnable numeric kernel therefore lives in
+// the tensor-expression surface (see src/blend_run.mind, which actually
+// evaluates). This module documents what an on-disk RGE state node and a
+// mutation record must satisfy; the executable state-transition kernel
+// lands once the blend is fully expressed in the evaluating surface
+// (gaps G1/G2 in the doc).
+
+#[protection]
+module rge {
+    type Q16_16 = i32
+
+    // --- Bounds (Design Book Ch.5.1: 50k nodes on FPGA, <0.5 ms mutate) ---
+
+    const MAX_NODES: i32 = 50000
+    const MAX_EDGES: i32 = 400000
+    // ~8 fan-out average
+
+    // Edge weights are normalized to [0.0, 1.0] in Q16.16.
+    const WEIGHT_MIN_Q16: Q16_16 = 0
+    // 0.0
+    const WEIGHT_MAX_Q16: Q16_16 = 65536
+    // 1.0
+
+    // Rollback / evidence window. Confirmed by Polo (Dollarchip): the
+    // 3-version depth applies to BOTH firmware-image OTA and state-graph
+    // rollback — the RGE keeps the last 3 consistent snapshots for
+    // auditability and recovery. Sets the evidence-window size.
+    const ROLLBACK_DEPTH: i32 = 3
+
+    // --- Node kinds: every hardware subsystem is a typed node ---
+    //
+    // Confirmed core taxonomy (shared XRM-I / XRM-II):
+    const KIND_AESA: i32 = 0
+    const KIND_COMPUTE: i32 = 1
+    const KIND_ISL: i32 = 2
+    const KIND_THERMAL: i32 = 3
+    const KIND_POWER: i32 = 4
+    const KIND_DTN: i32 = 5
+    // XRM-II deep-space specialized kinds (Polo, 2026-05-31):
+    const KIND_SEMANTIC: i32 = 6
+    // semantic-streaming / feature-vector node
+    const KIND_CONJUNCTION: i32 = 7
+    // conjunction-survival autonomy controller
+    const KIND_MAX: i32 = 7
+    // Taxonomy is extensible on-orbit via Runtime Graph OTA: new kinds
+    // can be admitted above KIND_MAX without a firmware reflash.
+
+    // --- State model ---
+
+    struct Node {
+        kind: i32,
+        // subsystem scalar state, normalized
+        state_q16: Q16_16,
+        // bumped on every accepted mutation
+        version: i32,
+    }
+
+    struct Edge {
+        src: i32,
+        dst: i32,
+        weight_q16: Q16_16,
+    }
+
+    // Graph header carries the evidence anchor. `state_hash` chains the
+    // prior epoch's hash with the applied mutation, mirroring MIND's
+    // trace_hash = SHA-256(canonical mic@1) provenance shape.
+    struct Graph {
+        node_count: i32,
+        edge_count: i32,
+        epoch: i32,
+        state_hash: i32,
+    }
+
+    // A single atomic mutation request against one node.
+    struct Mutation {
+        target_node: i32,
+        from_epoch: i32,
+        new_state_q16: Q16_16,
+    }
+
+    // --- Invariants: the predicate that makes a graph/mutation valid ---
+    //
+    // Each returns true iff the structural contract holds. In the
+    // governance kernel these fail closed: a mutation that violates any
+    // predicate is rejected before it touches committed state.
+
+    fn node_count_within_bounds(g: Graph) -> bool {
+        return g.node_count >= 0 && g.node_count <= MAX_NODES;
+    }
+
+    fn edge_count_within_bounds(g: Graph) -> bool {
+        return g.edge_count >= 0 && g.edge_count <= MAX_EDGES;
+    }
+
+    fn node_kind_valid(n: Node) -> bool {
+        return n.kind >= 0 && n.kind <= KIND_MAX;
+    }
+
+    fn node_state_normalized(n: Node) -> bool {
+        return n.state_q16 >= WEIGHT_MIN_Q16 && n.state_q16 <= WEIGHT_MAX_Q16;
+    }
+
+    fn edge_weight_in_range(e: Edge) -> bool {
+        return e.weight_q16 >= WEIGHT_MIN_Q16 && e.weight_q16 <= WEIGHT_MAX_Q16;
+    }
+
+    fn edge_no_self_loop(e: Edge) -> bool {
+        return e.src != e.dst;
+    }
+
+    fn edge_endpoints_in_range(e: Edge, g: Graph) -> bool {
+        return e.src >= 0 && e.src < g.node_count && e.dst >= 0 && e.dst < g.node_count;
+    }
+
+    // --- Atomicity / ordering: the determinism-critical pair ---
+    //
+    // A mutation is valid only if it observes the current epoch (no
+    // stale write) and targets a live node; the commit advances the
+    // epoch by exactly one, giving a total order over state changes.
+
+    fn mutation_targets_live_node(m: Mutation, g: Graph) -> bool {
+        return m.target_node >= 0 && m.target_node < g.node_count;
+    }
+
+    fn mutation_not_stale(m: Mutation, g: Graph) -> bool {
+        return m.from_epoch == g.epoch;
+    }
+
+    fn mutation_state_normalized(m: Mutation) -> bool {
+        return m.new_state_q16 >= WEIGHT_MIN_Q16 && m.new_state_q16 <= WEIGHT_MAX_Q16;
+    }
+
+    // Commit ordering: the post-commit epoch is exactly prior + 1.
+    fn epoch_advances_by_one(before: Graph, after: Graph) -> bool {
+        return after.epoch == before.epoch + 1;
+    }
+
+    // The accepted node's version bumps in lockstep with the epoch,
+    // so a node's version doubles as its mutation count.
+    fn node_version_advances(before: Node, after: Node) -> bool {
+        return after.version == before.version + 1;
+    }
+}

@@ -1,0 +1,5 @@
+rge_demo_host
+*.o
+*.elf
+*.bin
+__pycache__/

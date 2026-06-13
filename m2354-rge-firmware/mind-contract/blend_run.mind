@@ -1,0 +1,47 @@
+// XRM-SSD RGE — runnable blend kernel (tensor-expression surface).
+//
+// Unlike smoke.mind (C-style `fn` surface, which the open-core frontend
+// stubs to `output 0`), this is written in the tensor-expression surface
+// that the `mind eval` pipeline lowers to canonical IR and executes under
+// the `cpu-exec` feature.
+//
+// Edge-weighted state blend: one node folded against two inbound edges,
+// the determinism-critical pull-model recompute step of the RGE.
+//
+// Q16.16 raw domain (raw = value << 16). Integer literals so they coerce
+// to the tensor dtype cleanly (float literals still infer Scalar[f64] and
+// do not coerce to a tensor annotation — gap G1, unchanged).
+//
+//   w   = 0.5  -> 32768       a (src state) = 0.25 -> 16384
+//   inv = 0.5  -> 32768       b (src state) = 0.75 -> 49152
+//
+// Convex blend = (w*a + inv*b) rescaled by 2^16
+//             = (0.5*0.25 + 0.5*0.75) = 0.5 -> 32768 raw.
+//
+// dtype = i64, NOT i32, and that is load-bearing: the product of two Q16.16
+// values is a Q32.32 intermediate. At these weights w*a + inv*b lands on
+// exactly 2^31 (2147483648), one past the signed-i32 max — so an i32 blend
+// silently overflows. The Q32 accumulator must be i64. (Fixed-point gotcha,
+// confirmed empirically 2026-05-31.)
+//
+// RESCALE — `/ d` (d = 65536), NOT `>> 16`.  ===> 32768, VERIFIED under cpu-exec.
+// The natural Q16.16 rescale is an arithmetic right-shift by 16. On mind 0.7.0
+// the `>>` operator is BROKEN at lowering: `(w*a+inv*b) >> 16` lowers to a bare
+// `%n = const.i64 0` — the shift node is replaced by a zero constant and its
+// entire operand subtree is discarded (even a trivial `100 >> 2` lowers to 0).
+// cpu-exec cannot rescue it because the op never survives lowering. See
+// docs/CODEGEN_ASKS.md ask #3 (reclassified preview-fold -> correctness bug).
+//
+// Workaround used here: integer divide by 2^16 via a tensor divisor. This
+// lowers to the COMPLETE, correct IR  ` mul ; mul ; add ; div `  and executes
+// to 32768. For the RGE state/weight domain this is sound: weights are in
+// [0,1] and states are bounded non-negative, so `>>16` and `/65536` agree
+// (they differ only on negatives, which this domain does not produce). Swap
+// back to `>>16` once the shift lowering is fixed in the core.
+
+let w: tensor<i64[2, 2]> = 32768
+let a: tensor<i64[2, 2]> = 16384
+let inv: tensor<i64[2, 2]> = 32768
+let b: tensor<i64[2, 2]> = 49152
+let d: tensor<i64[2, 2]> = 65536
+(w * a + inv * b) / d
