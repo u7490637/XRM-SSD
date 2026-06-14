@@ -16,15 +16,21 @@
 #include <stdio.h>
 #include <string.h>
 
-#ifdef HOST_BUILD
+/* Output works on BOTH targets: host -> stdout; device -> semihosting (the SWD
+ * debugger console), so seeing the run on silicon needs no UART pin-mux or
+ * clock bring-up — the riskiest board-specific bits are sidestepped. */
 static void print_hash(const char *label, const uint8_t h[32]) {
     printf("%s ", label);
     for (int i = 0; i < 32; i++) printf("%02x", h[i]);
     printf("\n");
 }
-#endif
 
 int main(void) {
+#ifndef HOST_BUILD
+    /* Route newlib stdio over the semihosting channel to the debugger console. */
+    extern void initialise_monitor_handles(void);
+    initialise_monitor_handles();
+#endif
     crypto_accel_init();
 
     /* A tiny graph: one COMPUTE node, genesis epoch, zero hash. */
@@ -46,21 +52,15 @@ int main(void) {
         };
 
         if (rge_commit(&g, &node, &m)) {
-#ifdef HOST_BUILD
             printf("epoch=%d node.state=%d node.version=%d  ",
-                   g.epoch, node.state_q16, node.version);
+                   (int)g.epoch, (int)node.state_q16, (int)node.version);
             print_hash("hash=", g.state_hash);
-#endif
         } else {
-#ifdef HOST_BUILD
-            printf("epoch=%d  MUTATION REJECTED (fail-closed)\n", g.epoch);
-#endif
+            printf("epoch=%d  MUTATION REJECTED (fail-closed)\n", (int)g.epoch);
         }
     }
 
-#ifdef HOST_BUILD
     printf("\nFinal: epoch=%d  blended state should be 32768 -> %d\n",
-           g.epoch, node.state_q16);
-#endif
+           (int)g.epoch, (int)node.state_q16);
     return 0;
 }

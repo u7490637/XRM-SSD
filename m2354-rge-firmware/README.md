@@ -54,16 +54,52 @@ Python host reference. **If the per-epoch hashes match line-for-line, the
 host and the device agree** — that's the property the on-orbit attestation
 relies on.
 
-## Flash to the M2354
+## Flash it on your NuMaker-M2354
+
+The device build is **self-contained** — it needs only `arm-none-eabi-gcc`
+(no Nuvoton BSP). Output is over **semihosting**, so you see the run on the
+debugger console with no UART pin-mux or clock bring-up.
+
+```sh
+cd m2354
+make device          # -> build/rge_m2354.{elf,bin,hex}  (Cortex-M23, ~16 KB)
+```
+
+Flash the image however you already do:
+
+- **pyOCD** (`pip install pyocd && pyocd pack install M2354`):
+  ```sh
+  make flash         # = pyocd flash -t m2354 build/rge_m2354.bin
+  ```
+- **Nu-Link / NuMaker**: flash `build/rge_m2354.bin` with the Nuvoton tool, or
+  drag-drop it onto the NuMaker mass-storage drive.
+- **Keil MDK**: open `build/rge_m2354.elf`.
+
+**See it run:** start a debug session (Nu-Link GDB server, `pyocd gdbserver`,
+OpenOCD, or Keil) — the three governed epochs print over semihosting:
+
+```
+epoch=1 node.state=32768 node.version=1  hash= 295b629000247bde54b2adfa0edbf33a4cf5606022222a5a996b8ead2d414803
+epoch=2 node.state=32768 node.version=2  hash= afe69a642b8ad19c4ae4dfb1a1c64187f5e0460be5d1ce67bd4f0affb9430c19
+epoch=3 node.state=32768 node.version=3  hash= d2afcdf58ad6b96f6a41267eb164c625fb66caa859163603a664bd63ff314499
+```
+
+Those hashes are **byte-identical** to `make test` and `host/rge_host.py` — the
+silicon agrees with the host reference, which is the whole attestation property.
+(v1 uses the portable SHA-256 so the digests match exactly.)
+
+> Build verified: host (`make test`) and the Cortex-M23 cross-compile + link
+> (`make device` → `rge_m2354.bin`) both green; the on-silicon run is yours to
+> confirm. The image is tiny (~16 KB flash / <8 KB RAM) — fits every M2354.
+
+### v2 — hardware SHA engine (optional, needs the BSP)
 
 ```sh
 make cross BSP_DIR=/path/to/Nuvoton/M2354/BSP
 ```
 
-Then link the objects with your BSP startup + linker script and flash with
-NuLink / the on-board NuMaker debugger. `-DM2354_BSP` routes SHA-256 through
-the hardware engine; the digest is identical to the software fallback, so
-host attestation still holds.
+`-DM2354_BSP` routes SHA-256 through the M2354 crypto accelerator; the digest is
+identical to the software fallback, so host attestation still holds.
 
 ## The MIND path (v2)
 
