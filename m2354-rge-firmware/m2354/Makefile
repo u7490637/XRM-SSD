@@ -5,10 +5,12 @@
 #   make host        -> build + link the host demo (runs on your laptop, prints
 #                       the evidence-chained epochs). Software SHA-256 fallback.
 #   make run         -> build host, then run it.
-#   make device      -> cross-compile for the NuMaker-M2354 (Cortex-M23) using
-#                       the Nuvoton BSP hardware SHA engine (-DM2354_BSP).
-#                       Requires arm-none-eabi-gcc + M2354_BSP pointing at the
-#                       Nuvoton BSP checkout.
+#   make device      -> cross-compile for the NuMaker-M2354 (Cortex-M23).
+#                       Output via SEMIHOSTING — needs a SWD debugger attached.
+#                       Requires arm-none-eabi-gcc.
+#   make uart        -> same as device, but stdio over UART0 -> Nu-Link2-Me
+#                       USB-VCOM. Flash it, open any serial terminal @115200 8N1,
+#                       reset — epochs scroll live, NO debugger needed.
 #   make clean
 #
 # The host and device builds compile the SAME rge.c / sha256.c so the digest
@@ -27,7 +29,7 @@ HOST_CC      ?= cc
 HOST_CFLAGS  := -std=c11 -O2 -Wall -Wextra -Werror -I$(INC) -DHOST_BUILD
 HOST_BIN     := $(BUILD)/rge_host
 
-.PHONY: all host run device flash clean
+.PHONY: all host run device uart flash clean
 all: host
 
 host: $(HOST_BIN)
@@ -70,6 +72,39 @@ $(DEV_BIN): $(DEV_ELF)
 	@echo "Built $@ (raw binary — Nu-Link / pyOCD / NuMaker drag-drop)."
 
 $(DEV_HEX): $(DEV_ELF)
+	$(ARM_OBJCOPY) -O ihex $< $@
+
+# ---- Device build, UART variant (no debugger needed) ----------------------
+# Identical to `device` but routes stdio over UART0 -> the Nu-Link2-Me USB-VCOM
+# bridge instead of semihosting. Flash the .bin, open ANY serial terminal
+# (NuConsole / PuTTY / screen) on the board's COM port at 115200 8N1, reset the
+# board, and the evidence-chained epochs scroll live — NO SWD debugger session
+# required. Self-contained (bare UART0 register writes), no Nuvoton BSP, and the
+# on-device SHA-256 digest stays byte-identical to `make run` on the host.
+UART_CFLAGS  := -std=c11 -Os -Wall -Wextra -mcpu=cortex-m23 -mthumb \
+                -ffunction-sections -fdata-sections -ffreestanding \
+                -DUART_BUILD -I$(INC)
+UART_LDFLAGS := -mcpu=cortex-m23 -mthumb -T $(DEV_DIR)/m2354.ld \
+                --specs=nano.specs --specs=nosys.specs \
+                -Wl,--gc-sections -Wl,-Map=$(BUILD)/rge_m2354_uart.map
+UART_SRCS    := $(COMMON_SRCS) $(MAIN_SRC) $(DEV_DIR)/startup_m2354.c \
+                $(DEV_DIR)/uart_m2354.c
+UART_ELF     := $(BUILD)/rge_m2354_uart.elf
+UART_BIN     := $(BUILD)/rge_m2354_uart.bin
+UART_HEX     := $(BUILD)/rge_m2354_uart.hex
+
+.PHONY: uart
+uart: $(UART_BIN) $(UART_HEX)
+
+$(UART_ELF): $(UART_SRCS) $(DEV_DIR)/m2354.ld | $(BUILD)
+	$(ARM_CC) $(UART_CFLAGS) $(UART_LDFLAGS) $(UART_SRCS) -o $@
+	@$(ARM_SIZE) $@
+
+$(UART_BIN): $(UART_ELF)
+	$(ARM_OBJCOPY) -O binary $< $@
+	@echo "Built $@ (UART/VCOM — flash, open terminal @115200 8N1, reset)."
+
+$(UART_HEX): $(UART_ELF)
 	$(ARM_OBJCOPY) -O ihex $< $@
 
 # Flash with pyOCD (pip install pyocd && pyocd pack install M2354). If pyOCD is
