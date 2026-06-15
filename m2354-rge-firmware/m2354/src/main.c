@@ -26,7 +26,13 @@ static void print_hash(const char *label, const uint8_t h[32]) {
 }
 
 int main(void) {
-#ifndef HOST_BUILD
+#if defined(UART_BUILD)
+    /* Route newlib stdio over UART0 -> Nu-Link2-Me USB-VCOM. Output scrolls
+     * live in any serial terminal (NuConsole, PuTTY, screen) at 115200 8N1 —
+     * NO debugger needed. */
+    extern void uart_init(void);
+    uart_init();
+#elif !defined(HOST_BUILD)
     /* Route newlib stdio over the semihosting channel to the debugger console. */
     extern void initialise_monitor_handles(void);
     initialise_monitor_handles();
@@ -62,5 +68,11 @@ int main(void) {
 
     printf("\nFinal: epoch=%d  blended state should be 32768 -> %d\n",
            (int)g.epoch, (int)node.state_q16);
+
+#if defined(UART_BUILD)
+    /* Make sure the last line is fully transmitted before we park. */
+    extern void uart_flush(void);
+    uart_flush();
+#endif
     return 0;
 }
