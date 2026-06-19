@@ -1,0 +1,35 @@
+2026-06-19 11:20:26 [INFO] === Received front-end scheduling pulse, initiated industrial-grade diagnostics ===
+
+2026-06-19 11:20:26 [DEBUG] -> Node-A Topology Decomposition: G=0.45, P=0.92, R=0.78 | Availability=0.99 | Trust=0.95
+
+2026-06-19 11:20:26 [DEBUG] -> Node-B Topology Decomposition: G=0.75, P=0.80, R=0.85 | Availability=0.95 | Trust=0.90
+
+2026-06-19 11:20:26 [INFO] Node-A Contribution Breakdown: Entropy=25.6%, KV=28.8%, Matrix=45.6% → Total 0.7119
+
+2026-06-19 11:20:26 [INFO] Node-B Contribution Breakdown: Entropy=20.0%, KV=9.9%, Matrix=70.0% → Total 0.4852
+
+2026-06-19 11:20:26 [INFO] 【Decision Explanation】Node-A wins, mainly due to the advantage of Entropy + KV_Cache dynamic metrics (leading by 0.2267)
+
+2026-06-19 11:20:26 [INFO] Algorithm computation time: 50.92ms | Memory overhead: 2.1KB [Close to the upper limit]
+
+2026-06-19 11:20:26 [INFO] 【Time Trend】This time 50.92ms (historical average 1.45ms, +3412.0%) | Lightweight mode: Not Enabled (High Precision)
+
+2026-06-19 11:20:26 [INFO] 【Stage Summary】Node-A achieved a winning streak of 1 time | Average Total 0.7119 | Time Consumption Trend: Oscillating Upward
+
+2026-06-19 11:22:54 [INFO] === Received front-end scheduling pulse, initiated industrial-grade diagnostics ===
+
+2026-06-19 11:22:54 [DEBUG] -> Node-A Topology Deployment: G=0.45, P=0.92, R=0.78 | Availability=0.99 | Trust=0.95
+
+2026-06-19 11:22:54 [DEBUG] -> Node-B Topology Deployment: G=0.75, P=0.80, R=0.85 | Availability=0.95 | Trust=0.90
+
+2026-06-19 11:22:54 [INFO] Node-A Contribution Breakdown: Entropy=25.5%, KV=28.8%, Matrix=45.6% → Total 0.7113
+
+2026-06-19 11:22:54 [INFO] Node-B Contribution Breakdown: Entropy=20.0%, KV=10.0%, Matrix=70.0% → Total 0.4856
+
+2026-06-19 11:22:54 [INFO] 【Decision Explanation】Node-A wins, mainly due to the advantage of Entropy + KV_Cache dynamic metrics (leading by 0.2257)
+
+2026-06-19 11:22:54 [INFO] Algorithm computation time: 2.46ms | Memory overhead: 2.1KB [Near Limit]
+
+2026-06-19 11:22:54 [INFO] 【Time Elapsed Trend】This time 2.46ms (historical average 1.45ms, +69.8%) | Lightweight Mode: Not Enabled (High Precision)
+
+2026-06-19 11:22:54 [INFO] 【Stage Summary】Node-A accumulated 1 winning streak | Average Total 0.7113 | Time Elapsed Trend: Oscillating upwards
