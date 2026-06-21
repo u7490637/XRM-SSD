@@ -40,6 +40,9 @@ firmware/
     apply_run.mind         commit counters epoch/version + 1 -> folds to 8
     chain_run.mind         evidence-chain mix        -> folds to 1615839279860409
     m2354_kernel.mind      v2 skeleton: commit step composed + Armv8-M checklist
+    lpcc2_score.mind       verify-only contract: LPCC-2 node-arbitration scorer
+    lpcc2_score_run.mind   full-precision score       -> folds to 0.7312 (Node-A)
+    lpcc2_light_run.mind   degraded (R*0.90) score    -> folds to 0.7202 (Node-A)
 ```
 
 ## Run it today (no hardware)
@@ -119,6 +122,8 @@ cd mind-contract
 mind eval --exec "$(grep -vE '^\s*//|^\s*$' blend_run.mind | tr '\n' ' ')"   # -> 32768
 mind eval --exec "$(grep -vE '^\s*//|^\s*$' apply_run.mind | tr '\n' ' ')"   # -> 8
 mind eval --exec "$(grep -vE '^\s*//|^\s*$' chain_run.mind | tr '\n' ' ')"   # -> 1615839279860409
+mind eval --exec "$(grep -vE '^\s*//|^\s*$' lpcc2_score_run.mind | tr '\n' ' ')"  # -> 0.7312 (Node-A)
+mind eval --exec "$(grep -vE '^\s*//|^\s*$' lpcc2_light_run.mind | tr '\n' ' ')"  # -> 0.7202 (Node-A degraded)
 ```
 
 `m2354_kernel.mind` is the skeleton the eventual Armv8-M backend lowers — the

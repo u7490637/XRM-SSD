@@ -1,0 +1,146 @@
+// Copyright 2026 STARGA, Inc. / Dollarchip — XRM-SSD.
+// STARGA Commercial License.
+//
+// XRM-SSD LPCC-2 node-arbitration scorer — MIND verify-only contract.
+//
+// Re-states the LPCC-2 dynamic-weighting decision (the Node-A vs Node-B
+// arbitration the PC bridge computes per front-end pulse) as a deterministic
+// Q16.16 contract. The bridge's float kernel (../m2354_firmware/bridge.c) and
+// the M2354 firmware are the two implementations this contract governs; the
+// runnable numeric kernel that actually folds to values lives in the
+// tensor-expression surface (lpcc2_score_run.mind / lpcc2_light_run.mind).
+//
+// THE FORMULA (revealed + verified against the bridge log, 2026-06-21):
+//
+//     Total = ( alpha*Entropy + epsilon*KV
+//               + (W_G*G + W_P*P + W_R*R) ) * Availability * Trust
+//
+// The matrix term is a WEIGHTED SUM (0.20/0.15/0.15), not a G*P*R product —
+// and Availability*Trust scales the WHOLE expression, which is why a naive
+// back-solve of the per-node matrix term from the % decomposition fails (the
+// scale cancels in the numerator/denominator of the contribution split).
+//
+// Like rge.mind this is a VERIFY-ONLY contract (type alias + consts + invariant
+// predicates). The C-style scalar `fn` surface does NOT lower to executable IR
+// on the open-core build (bodies emit a placeholder `output 0`); the executable
+// kernels are the tensor-surface files. This module documents what a valid
+// LPCC-2 scoring input and decision must satisfy.
+
+#[protection]
+module lpcc2 {
+    type Q16_16 = i64
+
+    // --- Weight constants (Q16.16 raw = value << 16) ---
+    // alpha / epsilon: dynamic-metric sensitivity (Entropy, KV-cache).
+    const ALPHA_Q16: Q16_16 = 16384
+    // 0.25
+    const EPSILON_Q16: Q16_16 = 16384
+    // 0.25
+    // Backbone matrix weights (G governance, P performance, R reliability).
+    const W_G_Q16: Q16_16 = 13107
+    // 0.20
+    const W_P_Q16: Q16_16 = 9830
+    // 0.15
+    const W_R_Q16: Q16_16 = 9830
+    // 0.15
+    // Degraded-mode R down-weight (lightweight overflow relief: R *= 0.90).
+    const R_LIGHT_FACTOR_Q16: Q16_16 = 58982
+    // 0.90  (0x0000E666)
+    // Q16.16 rescale divisor (== 1.0).
+    const SCALE_Q16: Q16_16 = 65536
+
+    // All scoring inputs are normalized metrics/weights in [0.0, 1.0] Q16.16.
+    const INPUT_MIN_Q16: Q16_16 = 0
+    // 0.0
+    const INPUT_MAX_Q16: Q16_16 = 65536
+    // 1.0
+
+    // A node's per-pulse scoring inputs, as parsed from the front-end command.
+    struct ScoreInput {
+        entropy_q16: Q16_16,
+        kv_q16: Q16_16,
+        g_q16: Q16_16,
+        p_q16: Q16_16,
+        r_q16: Q16_16,
+        availability_q16: Q16_16,
+        trust_q16: Q16_16,
+    }
+
+    // --- Input validity: every metric must be normalized before scoring ---
+    //
+    // CONTRACT NOTE (the bridge.c parser bug this guards against): the float
+    // bridge's sscanf offsets land ON the value's opening quote, so the parse
+    // fails silently and every input falls back to its hardcoded default —
+    // i.e. the "dynamic" scorer was scoring CONSTANTS. A normalized-input
+    // predicate that fails closed makes that failure mode loud instead of
+    // silent: a parse that yields an out-of-[0,1] or unchanged-default value is
+    // rejected rather than quietly scored.
+
+    fn input_normalized(s: ScoreInput) -> bool {
+        return s.entropy_q16 >= INPUT_MIN_Q16 && s.entropy_q16 <= INPUT_MAX_Q16
+            && s.kv_q16 >= INPUT_MIN_Q16 && s.kv_q16 <= INPUT_MAX_Q16
+            && s.g_q16 >= INPUT_MIN_Q16 && s.g_q16 <= INPUT_MAX_Q16
+            && s.p_q16 >= INPUT_MIN_Q16 && s.p_q16 <= INPUT_MAX_Q16
+            && s.r_q16 >= INPUT_MIN_Q16 && s.r_q16 <= INPUT_MAX_Q16
+            && s.availability_q16 >= INPUT_MIN_Q16 && s.availability_q16 <= INPUT_MAX_Q16
+            && s.trust_q16 >= INPUT_MIN_Q16 && s.trust_q16 <= INPUT_MAX_Q16;
+    }
+
+    // --- The scoring core (Q16.16, i64-accumulated, /SCALE rescale) ---
+    //
+    // i64 IS LOAD-BEARING: each Q16.16*Q16.16 product is a Q32.32 intermediate.
+    // This is the int64_t cast the first bridge.c fixed-point draft omitted (the
+    // Q32.32 overflow trap — W_G*G overflows i32 before the rescale). The
+    // products and accumulator are i64; only the final rescaled Total is in
+    // Q16.16 range.
+
+    fn dynamic_term(s: ScoreInput) -> Q16_16 {
+        return (ALPHA_Q16 * s.entropy_q16) / SCALE_Q16
+             + (EPSILON_Q16 * s.kv_q16) / SCALE_Q16;
+    }
+
+    fn matrix_term(s: ScoreInput) -> Q16_16 {
+        return (W_G_Q16 * s.g_q16) / SCALE_Q16
+             + (W_P_Q16 * s.p_q16) / SCALE_Q16
+             + (W_R_Q16 * s.r_q16) / SCALE_Q16;
+    }
+
+    // Degraded matrix term: R down-weighted by 0.90 (lightweight overflow
+    // relief). The down-weight MUST be this fixed-point multiply on both the PC
+    // bridge and the M2354, or the substrates diverge under load.
+    fn matrix_term_light(s: ScoreInput) -> Q16_16 {
+        return (W_G_Q16 * s.g_q16) / SCALE_Q16
+             + (W_P_Q16 * s.p_q16) / SCALE_Q16
+             + (W_R_Q16 * ((s.r_q16 * R_LIGHT_FACTOR_Q16) / SCALE_Q16)) / SCALE_Q16;
+    }
+
+    fn env_scale(s: ScoreInput) -> Q16_16 {
+        return (s.availability_q16 * s.trust_q16) / SCALE_Q16;
+    }
+
+    // Total = (dynamic + matrix) * scale, rescaled. Truncating rescale (floor);
+    // both substrates must share this rounding rule for ULP bit-identity.
+    fn score(s: ScoreInput) -> Q16_16 {
+        return ((dynamic_term(s) + matrix_term(s)) * env_scale(s)) / SCALE_Q16;
+    }
+
+    fn score_light(s: ScoreInput) -> Q16_16 {
+        return ((dynamic_term(s) + matrix_term_light(s)) * env_scale(s)) / SCALE_Q16;
+    }
+
+    // --- Arbitration: the decision is a deterministic comparison ---
+    //
+    // BestNode = argmax(score). With two nodes that is a single comparison; the
+    // winner is bit-identical across the PC bridge and the M2354 once both run
+    // the score() above. No float, no jitter, no per-substrate divergence.
+
+    fn node_a_wins(a: ScoreInput, b: ScoreInput) -> bool {
+        return score(a) > score(b);
+    }
+
+    // Verified reference values (see lpcc2_score_run.mind, folded under
+    // `mind eval --exec` 2026-06-21):
+    //   Node-A score -> 0.7312 (47921.95 raw)   WINNER
+    //   Node-B score -> 0.6712 (43985.11 raw)
+    // matching the bridge.c float log exactly on the Q16.16 grid.
+}
