@@ -1,0 +1,22 @@
+{
+  "_comment": "Canonical frozen input vector for cross-substrate bit-identity. Every surface (C / Python / Swift / .mind) must fold THESE exact Q16.16 integers to the same raw output. This is the apples-to-apples determinism target — earlier 'bit-identical' passes each agreed with themselves on a different input.",
+  "vector_id": "frozen-2026-06-22",
+  "format": "Q16.16",
+  "inputs": {
+    "entropy": 45000,
+    "kv": 32768,
+    "g": 50000,
+    "p": 28000,
+    "r": 60000,
+    "availability": 55000,
+    "trust": 48000
+  },
+  "expected": {
+    "normal_q16": 26211,
+    "normal_float": 0.3999,
+    "degraded_q16": 25658,
+    "degraded_float": 0.3915
+  },
+  "ground_truth": "C (gcc -O0 and -O3 -march=native, byte-identical)",
+  "note": "Single-node vector. Decision-level (A/B arbitration) proof requires a second frozen vector for Node-B."
+}
