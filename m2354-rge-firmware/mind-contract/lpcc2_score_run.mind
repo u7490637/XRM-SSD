@@ -128,13 +128,14 @@ let d:       tensor<i64[1]> = 65536
 // ============================================================================
 
 // ============================================================================
-// MODIFIED EXPRESSION:
+// MODIFIED EXPRESSION (FIXED DOUBLE-DIVIDE):
 // - All multiplications: +0x8000 Round-Half compensation
 // - Locked accumulation order: (((Entropy + KV) + G) + P) + R
+// - Corrected scale term: single division to preserve Q16.16 grid on integer board
 // ============================================================================
 ((((((alpha * entropy + 0x8000) / d) 
    + ((epsilon * kv + 0x8000) / d)) 
    + ((w_g * g + 0x8000) / d)) 
    + ((w_p * p + 0x8000) / d)) 
    + ((w_r * r + 0x8000) / d)) 
-   * (((avail * trust + 0x8000) / d) / d)
+   * ((avail * trust + 0x8000) / d)
