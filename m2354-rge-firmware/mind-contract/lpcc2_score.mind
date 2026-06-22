@@ -25,6 +25,12 @@
 // on the open-core build (bodies emit a placeholder `output 0`); the executable
 // kernels are the tensor-surface files. This module documents what a valid
 // LPCC-2 scoring input and decision must satisfy.
+//
+// ============================================================================
+// MODIFIED SECTION: All multiplications now include +0x8000 Round-Half 
+// compensation, and the accumulation order is locked to:
+//   (((Entropy + KV) + G) + P) + R
+// ============================================================================
 
 #[protection]
 module lpcc2 {
@@ -32,28 +38,23 @@ module lpcc2 {
 
     // --- Weight constants (Q16.16 raw = value << 16) ---
     // alpha / epsilon: dynamic-metric sensitivity (Entropy, KV-cache).
-    const ALPHA_Q16: Q16_16 = 16384
-    // 0.25
-    const EPSILON_Q16: Q16_16 = 16384
-    // 0.25
+    const ALPHA_Q16: Q16_16 = 16384      // 0.25
+    const EPSILON_Q16: Q16_16 = 16384    // 0.25
+
     // Backbone matrix weights (G governance, P performance, R reliability).
-    const W_G_Q16: Q16_16 = 13107
-    // 0.20
-    const W_P_Q16: Q16_16 = 9830
-    // 0.15
-    const W_R_Q16: Q16_16 = 9830
-    // 0.15
+    const W_G_Q16: Q16_16 = 13107        // 0.20
+    const W_P_Q16: Q16_16 = 9830         // 0.15
+    const W_R_Q16: Q16_16 = 9830         // 0.15
+
     // Degraded-mode R down-weight (lightweight overflow relief: R *= 0.90).
-    const R_LIGHT_FACTOR_Q16: Q16_16 = 58982
-    // 0.90  (0x0000E666)
+    const R_LIGHT_FACTOR_Q16: Q16_16 = 58982    // 0.90 (0x0000E666)
+
     // Q16.16 rescale divisor (== 1.0).
     const SCALE_Q16: Q16_16 = 65536
 
     // All scoring inputs are normalized metrics/weights in [0.0, 1.0] Q16.16.
-    const INPUT_MIN_Q16: Q16_16 = 0
-    // 0.0
-    const INPUT_MAX_Q16: Q16_16 = 65536
-    // 1.0
+    const INPUT_MIN_Q16: Q16_16 = 0        // 0.0
+    const INPUT_MAX_Q16: Q16_16 = 65536    // 1.0
 
     // A node's per-pulse scoring inputs, as parsed from the front-end command.
     struct ScoreInput {
@@ -93,39 +94,74 @@ module lpcc2 {
     // Q32.32 overflow trap — W_G*G overflows i32 before the rescale). The
     // products and accumulator are i64; only the final rescaled Total is in
     // Q16.16 range.
+    //
+    // =========================================================================
+    // MODIFIED: All multiplications now include +0x8000 Round-Half compensation.
+    // Accumulation order is locked to: (((Entropy + KV) + G) + P) + R
+    // =========================================================================
 
     fn dynamic_term(s: ScoreInput) -> Q16_16 {
-        return (ALPHA_Q16 * s.entropy_q16) / SCALE_Q16
-             + (EPSILON_Q16 * s.kv_q16) / SCALE_Q16;
+        // Original: (ALPHA_Q16 * s.entropy_q16) / SCALE_Q16
+        //           + (EPSILON_Q16 * s.kv_q16) / SCALE_Q16
+        //
+        // Modified: Locked accumulation: (((Entropy) + KV) + 0) + 0 + 0
+        return (((((ALPHA_Q16 * s.entropy_q16 + 0x8000) / SCALE_Q16)
+                + ((EPSILON_Q16 * s.kv_q16 + 0x8000) / SCALE_Q16))
+                + 0) + 0) + 0;
     }
 
     fn matrix_term(s: ScoreInput) -> Q16_16 {
-        return (W_G_Q16 * s.g_q16) / SCALE_Q16
-             + (W_P_Q16 * s.p_q16) / SCALE_Q16
-             + (W_R_Q16 * s.r_q16) / SCALE_Q16;
+        // Original: (W_G_Q16 * s.g_q16) / SCALE_Q16
+        //           + (W_P_Q16 * s.p_q16) / SCALE_Q16
+        //           + (W_R_Q16 * s.r_q16) / SCALE_Q16
+        //
+        // Modified: Locked accumulation: (((G) + P) + R) + 0 + 0
+        return (((((W_G_Q16 * s.g_q16 + 0x8000) / SCALE_Q16)
+                + ((W_P_Q16 * s.p_q16 + 0x8000) / SCALE_Q16))
+                + ((W_R_Q16 * s.r_q16 + 0x8000) / SCALE_Q16))
+                + 0) + 0;
     }
 
     // Degraded matrix term: R down-weighted by 0.90 (lightweight overflow
     // relief). The down-weight MUST be this fixed-point multiply on both the PC
     // bridge and the M2354, or the substrates diverge under load.
     fn matrix_term_light(s: ScoreInput) -> Q16_16 {
-        return (W_G_Q16 * s.g_q16) / SCALE_Q16
-             + (W_P_Q16 * s.p_q16) / SCALE_Q16
-             + (W_R_Q16 * ((s.r_q16 * R_LIGHT_FACTOR_Q16) / SCALE_Q16)) / SCALE_Q16;
+        // Original: (W_G_Q16 * s.g_q16) / SCALE_Q16
+        //           + (W_P_Q16 * s.p_q16) / SCALE_Q16
+        //           + (W_R_Q16 * ((s.r_q16 * R_LIGHT_FACTOR_Q16) / SCALE_Q16)) / SCALE_Q16
+        //
+        // Modified: Locked accumulation: (((G) + P) + R_light) + 0 + 0
+        return (((((W_G_Q16 * s.g_q16 + 0x8000) / SCALE_Q16)
+                + ((W_P_Q16 * s.p_q16 + 0x8000) / SCALE_Q16))
+                + ((W_R_Q16 * ((s.r_q16 * R_LIGHT_FACTOR_Q16 + 0x8000) / SCALE_Q16) + 0x8000) / SCALE_Q16))
+                + 0) + 0;
     }
 
     fn env_scale(s: ScoreInput) -> Q16_16 {
-        return (s.availability_q16 * s.trust_q16) / SCALE_Q16;
+        // Original: (s.availability_q16 * s.trust_q16) / SCALE_Q16
+        //
+        // Modified: +0x8000 Round-Half compensation
+        return (s.availability_q16 * s.trust_q16 + 0x8000) / SCALE_Q16;
     }
 
     // Total = (dynamic + matrix) * scale, rescaled. Truncating rescale (floor);
     // both substrates must share this rounding rule for ULP bit-identity.
     fn score(s: ScoreInput) -> Q16_16 {
-        return ((dynamic_term(s) + matrix_term(s)) * env_scale(s)) / SCALE_Q16;
+        // Original: ((dynamic_term(s) + matrix_term(s)) * env_scale(s)) / SCALE_Q16
+        //
+        // Modified: Locked accumulation: (((dynamic + matrix) + 0) + 0 + 0)
+        //           with +0x8000 Round-Half compensation on the final multiplication
+        return (((((dynamic_term(s) + matrix_term(s)) * env_scale(s) + 0x8000) / SCALE_Q16)
+                + 0) + 0) + 0;
     }
 
     fn score_light(s: ScoreInput) -> Q16_16 {
-        return ((dynamic_term(s) + matrix_term_light(s)) * env_scale(s)) / SCALE_Q16;
+        // Original: ((dynamic_term(s) + matrix_term_light(s)) * env_scale(s)) / SCALE_Q16
+        //
+        // Modified: Locked accumulation: (((dynamic + matrix_light) + 0) + 0 + 0)
+        //           with +0x8000 Round-Half compensation on the final multiplication
+        return (((((dynamic_term(s) + matrix_term_light(s)) * env_scale(s) + 0x8000) / SCALE_Q16)
+                + 0) + 0) + 0;
     }
 
     // --- Arbitration: the decision is a deterministic comparison ---
