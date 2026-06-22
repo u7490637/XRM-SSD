@@ -38,6 +38,12 @@
 // Node-A stays the winner in degraded mode (Node-B degraded folds to ~0.6602),
 // so the relief path does NOT flip the arbitration — it only trades a small
 // precision margin for timing headroom, deterministically.
+//
+// ============================================================================
+// MODIFIED SECTION: All multiplications now include +0x8000 Round-Half 
+// compensation, and the accumulation order is locked to:
+//   (((Entropy + KV) + G) + P) + R
+// ============================================================================
 
 let entropy: tensor<i64[1]> = 55706
 let kv:      tensor<i64[1]> = 57672
@@ -55,6 +61,21 @@ let w_r:     tensor<i64[1]> = 9830
 let ninety:  tensor<i64[1]> = 58982
 let d:       tensor<i64[1]> = 65536
 
-((alpha * entropy + epsilon * kv) / d
-  + (w_g * g + w_p * p + w_r * ((r * ninety) / d)) / d)
-  * ((avail * trust) / d) / d
+// ============================================================================
+// ORIGINAL EXPRESSION (for reference):
+// ((alpha * entropy + epsilon * kv) / d
+//   + (w_g * g + w_p * p + w_r * ((r * ninety) / d)) / d)
+//   * ((avail * trust) / d) / d
+// ============================================================================
+
+// ============================================================================
+// MODIFIED EXPRESSION:
+// - All multiplications: +0x8000 Round-Half compensation
+// - Locked accumulation order: (((Entropy + KV) + G) + P) + R
+// ============================================================================
+((((((alpha * entropy + 0x8000) / d) 
+   + ((epsilon * kv + 0x8000) / d)) 
+   + ((w_g * g + 0x8000) / d)) 
+   + ((w_p * p + 0x8000) / d)) 
+   + ((w_r * ((r * ninety + 0x8000) / d) + 0x8000) / d)) 
+   * (((avail * trust + 0x8000) / d) / d)
