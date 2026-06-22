@@ -98,6 +98,12 @@
 //
 // ----------------------------------------------------------------------------
 // THE FULL-PRECISION SCORE, Node-A  (folds to 47921.95 on the host eval surface)
+//
+// ============================================================================
+// MODIFIED SECTION: All multiplications now include +0x8000 Round-Half 
+// compensation, and the accumulation order is locked to:
+//   (((Entropy + KV) + G) + P) + R
+// ============================================================================
 
 let entropy: tensor<i64[1]> = 55706
 let kv:      tensor<i64[1]> = 57672
@@ -114,6 +120,21 @@ let w_p:     tensor<i64[1]> = 9830
 let w_r:     tensor<i64[1]> = 9830
 let d:       tensor<i64[1]> = 65536
 
-((alpha * entropy + epsilon * kv) / d
-  + (w_g * g + w_p * p + w_r * r) / d)
-  * ((avail * trust) / d) / d
+// ============================================================================
+// ORIGINAL EXPRESSION (for reference):
+// ((alpha * entropy + epsilon * kv) / d
+//   + (w_g * g + w_p * p + w_r * r) / d)
+//   * ((avail * trust) / d) / d
+// ============================================================================
+
+// ============================================================================
+// MODIFIED EXPRESSION:
+// - All multiplications: +0x8000 Round-Half compensation
+// - Locked accumulation order: (((Entropy + KV) + G) + P) + R
+// ============================================================================
+((((((alpha * entropy + 0x8000) / d) 
+   + ((epsilon * kv + 0x8000) / d)) 
+   + ((w_g * g + 0x8000) / d)) 
+   + ((w_p * p + 0x8000) / d)) 
+   + ((w_r * r + 0x8000) / d)) 
+   * (((avail * trust + 0x8000) / d) / d)
