@@ -1,0 +1,9 @@
+Reproducibility Checklist
+•	Environment: 10×10 gridworld, tabular Q-learning, ε-greedy (ε_explore = 0.05), α = 0.1, γ = 0.99, episode length = 200.
+•	Balance sweep: λ ∈ {0.1, …, 0.9}, 11 values, 1,000 episodes each.
+•	Perturbation protocol: additive Gaussian noise N(0, ε²) to Q-values at each step, 4 ε levels.
+•	Flip detection: mode label threshold 60%; sensitivity tested at 50%, 70%.
+•	Stabilizers: invariant checker (Python, 42 lines); TMR voter (Python, 78 lines, 3 independent agents).
+•	Statistical validation: 1,000 independent random seeds per condition; reported as mean ± 1 SD.
+•	Hardware: all experiments run on CPU (no GPU required); single-core runtime < 2 hours total.
+
