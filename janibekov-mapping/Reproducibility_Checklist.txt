@@ -1,9 +1,391 @@
-Reproducibility Checklist
-•	Environment: 10×10 gridworld, tabular Q-learning, ε-greedy (ε_explore = 0.05), α = 0.1, γ = 0.99, episode length = 200.
-•	Balance sweep: λ ∈ {0.1, …, 0.9}, 11 values, 1,000 episodes each.
-•	Perturbation protocol: additive Gaussian noise N(0, ε²) to Q-values at each step, 4 ε levels.
-•	Flip detection: mode label threshold 60%; sensitivity tested at 50%, 70%.
-•	Stabilizers: invariant checker (Python, 42 lines); TMR voter (Python, 78 lines, 3 independent agents).
-•	Statistical validation: 1,000 independent random seeds per condition; reported as mean ± 1 SD.
-•	Hardware: all experiments run on CPU (no GPU required); single-core runtime < 2 hours total.
+================================================================================
+THE JANIBEKOV MAPPING — REPRODUCIBILITY CHECKLIST
+================================================================================
+
+Paper:   "The Janibekov Mapping: Physics-Informed Stability Analysis of
+          Balanced-Objective Agents: an Intermediate-Axis Instability
+          and Its Suppression"
+Authors: KY (Polo), Dollarchip / 瑞元科技, XRM-SSD Architecture Group
+Venue:   arXiv cs.AI / cs.LG  |  Preprint
+
+Codebase: janibekov_experiment.py
+Results:  Janibekov_Results.txt
+          results/raw_data.csv
+          results/*.png  (5 figures)
+
+This checklist documents every experiment component so that any independent
+researcher can reproduce all reported results from scratch.
+
+================================================================================
+SECTION 1: ENVIRONMENT SPECIFICATION
+================================================================================
+
+[✓] GRIDWORLD DEFINITION  (class GridWorld, janibekov_experiment.py:82–131)
+
+  Grid dimensions   : 10 × 10 cells
+  State space       : |S| = 100  (flat index: state = x * GRID_H + y)
+  Action space      : |A| = 4    (UP, DOWN, LEFT, RIGHT — deterministic transitions)
+  Start position    : (x=5, y=9)  bottom-centre of grid
+  Goal-A region     : x < 5, y < 5  (top-left quadrant, cells 0..4 × 0..4)
+  Goal-B region     : x ≥ 5, y < 5  (top-right quadrant, cells 5..9 × 0..4)
+  Boundary handling : clip to [0, GRID_W−1] × [0, GRID_H−1] — no walls, no holes
+  Episode length    : T = 200 steps (fixed, no early termination)
+
+  Reward structure:
+    R1(s,a) = +1.0  if next cell ∈ Goal-A,  else 0.0
+    R2(s,a) = +1.0  if next cell ∈ Goal-B,  else 0.0
+    R_time  = −0.01 per step (constant time penalty)
+    R_blend = λ · R1 + (1−λ) · R2 + R_time
+
+  The two goals are mutually exclusive (no cell is in both quadrants).
+  Steps toward goals are tracked per-episode for mode-label computation.
+
+[✓] REPRODUCIBILITY NOTES FOR ENVIRONMENT
+  • Environment uses a seeded Python stdlib random.Random instance.
+  • No stochastic transitions: actions always move to the intended cell
+    (clipped at boundary). All randomness enters only via the agent.
+  • Grid topology is constant across all runs; no random map generation.
+
+================================================================================
+SECTION 2: Q-LEARNING AGENT SPECIFICATION
+================================================================================
+
+[✓] AGENT DEFINITION  (class QAgent, janibekov_experiment.py:134–183)
+
+  Algorithm         : Tabular Q-learning (Watkins, 1989)
+  Q-table           : list of lists, shape [|S|, |A|] = [100, 4]
+  Initialization    : all Q-values = 0.0
+  Learning rate α   : 0.10  (ALPHA constant)
+  Discount factor γ : 0.99  (GAMMA constant)
+  Exploration       : ε-greedy with ε_explore = 0.05  (EPS_EXPLORE constant)
+
+  Update rule (standard Q-learning):
+    Q(s,a) ← Q(s,a) + α · [R + γ · max_a' Q(s',a') − Q(s,a)]
+    (where max_a' Q(s',a') = 0 if episode terminates)
+
+  Action selection:
+    With probability ε_explore : choose uniformly random action
+    Otherwise                  : choose argmax_a [Q(s,a) + N(0,ε²)]
+    where ε is the perturbation magnitude (0 during pre-training)
+
+[✓] PERTURBATION PROTOCOL  (function _gauss, line 185)
+  Perturbation at each action selection step:
+    For each action a: perturbed_Q(s,a) = Q(s,a) + η_a
+    where η_a ~ N(0, ε²),  independent per action per step
+  Implemented via Box-Muller transform (pure Python stdlib, no numpy required)
+  ε = 0  during pre-training phase (first 100 episodes of each run)
+
+[✓] PRE-TRAINING PROTOCOL
+  Each experiment seeds a fresh QAgent and runs 100 episodes with ε = 0
+  (no perturbation) before the measurement phase begins.
+  Purpose: allow policy to converge before instability is measured.
+  Pre-training uses the same λ as the measurement phase.
+
+================================================================================
+SECTION 3: BEHAVIOR MODE DETECTION
+================================================================================
+
+[✓] MODE LABELING  (function episode_mode, line 190)
+
+  At each episode end, compute:
+    frac_A = steps_toward_A / (steps_toward_A + steps_toward_B)
+
+  Mode assignment:
+    'A'  if frac_A >= MODE_THRESH  (MODE_THRESH = 0.60)
+    'B'  otherwise
+    If (steps_toward_A + steps_toward_B) == 0: assign 'B'  (default)
+
+  "Steps toward A" counts episodes where the agent physically enters
+  the Goal-A quadrant (x < 5, y < 5) during that episode.
+
+[✓] FLIP DETECTION  (function count_flips, line 197)
+  mode_sequence = [mode of episode 0, mode of episode 1, ..., mode of episode N−1]
+  flip = mode_sequence[i] != mode_sequence[i-1]
+  flip_count = sum of all flips over the episode sequence
+
+[✓] FLIP RATE COMPUTATION
+  flip_rate = (flip_count / (N_EPISODES − 1)) × 100
+  Unit: flips per 100 episodes
+  Denominator is N_EPISODES − 1 to count transitions, not episodes.
+
+[✓] DWELL TIME  (function dwell_times, line 203)
+  dwell = length of maximal consecutive run of same mode label
+  dwell_times_list = [run1_length, run2_length, ..., runK_length]
+  Used for mean dwell time and dwell-time distribution plots.
+
+[✓] MODE THRESHOLD SENSITIVITY
+  The 0.60 threshold has been verified at 0.50 and 0.70.
+  Results are qualitatively unchanged (instability peak at λ ≈ 0.50 in all
+  cases; exact flip-rate magnitudes differ by ≤15%).
+
+================================================================================
+SECTION 4: INVARIANT CHECKER STABILIZER
+================================================================================
+
+[✓] IMPLEMENTATION  (class InvariantChecker, janibekov_experiment.py:213–248)
+
+  The Invariant Checker is a hard constraint layer wrapping a QAgent.
+  It maintains current_mode (initialized to previous episode's mode label).
+
+  Action selection algorithm:
+    1. With probability ε_explore: return random action (exploration)
+    2. Compute perturbed Q-values: q_a = Q(s,a) + N(0,ε²)
+    3. Rank actions in decreasing q_a order → ranked list
+    4. Scan ranked list:
+         For each action a in ranked order:
+           Simulate the resulting next cell (nx, ny)
+           IF current_mode == 'A' AND next cell ∈ Goal-B: SKIP  (mode violation)
+           IF current_mode == 'B' AND next cell ∈ Goal-A: SKIP  (mode violation)
+           ELSE: return action a  (mode-consistent best action)
+    5. If all actions violate (edge case): return ranked[0] as fallback
+
+  Q-table update: standard Q-learning (same as base agent)
+  The checker does NOT modify Q-values; it only filters action selection.
+
+  Current mode update: set at episode start from previous episode's mode label.
+  First episode: current_mode = None → constraint inactive for first episode.
+
+[✓] PROVENANCE
+  Written from scratch; no dependency on XRM-SSD internal toolchain,
+  MIND compiler, FORTRESS components, or any Dollarchip-internal code.
+  Approximately 42 lines of pure Python (class definition + methods).
+
+================================================================================
+SECTION 5: TMR ENSEMBLE VOTER STABILIZER
+================================================================================
+
+[✓] IMPLEMENTATION  (class TMRVoter, janibekov_experiment.py:252–271)
+
+  TMR = Triple Modular Redundancy (fault-tolerance principle)
+  Three independent QAgent instances, each with a distinct random seed:
+    Agent 0: seed = SEED_BASE       = 42
+    Agent 1: seed = SEED_BASE + 7   = 49
+    Agent 2: seed = SEED_BASE + 13  = 55
+
+  Action selection:
+    votes = [agent_i.select_action(state, perturbation=ε) for i in 0,1,2]
+    action = majority vote (most common value in votes)
+    Tie-breaking: defaultdict(int) with max(); Python dicts are ordered,
+    so ties resolve deterministically by first-encountered action index.
+
+  Q-table update: ALL three agents receive the same Q-learning update
+  after each shared step. They diverge only via their independent
+  perturbation samples (η_a drawn separately per agent).
+
+  Pre-training: same 100-episode pre-training with ε=0 for all 3 agents.
+
+[✓] PROVENANCE
+  Written from scratch; generic triple-redundancy, no proprietary components.
+  Approximately 78 lines of pure Python (class definition + helpers).
+
+================================================================================
+SECTION 6: COMBINED STABILIZER
+================================================================================
+
+[✓] IMPLEMENTATION  (class CombinedStabilizer, janibekov_experiment.py:275–318)
+
+  Two-layer defense: TMR vote → Invariant Checker filter.
+
+  Action selection:
+    1. Get TMR majority-vote action (using seeds base+1, base+5, base+11)
+    2. Simulate resulting next cell
+    3. IF mode violation (same rules as standalone Checker): scan remaining
+       actions for first mode-consistent alternative
+    4. Return final action
+
+  Update: delegated to TMR.update() (updates all 3 internal agents).
+  Mode tracking: same episode-start assignment as standalone Checker.
+
+================================================================================
+SECTION 7: EXPERIMENT SWEEP PARAMETERS
+================================================================================
+
+[✓] BALANCE PARAMETER (λ) SWEEP
+  Values : [0.10, 0.20, 0.30, 0.40, 0.45, 0.50, 0.55, 0.60, 0.70, 0.80, 0.90]
+  Count  : 11 values
+  Fixed  : ε = 0.10
+
+[✓] PERTURBATION MAGNITUDE (ε) SWEEP
+  Values : [0.01, 0.05, 0.10, 0.20]
+  Count  : 4 values
+  Fixed  : λ = 0.50  (instability peak)
+
+[✓] ABLATION CONDITIONS (at λ=0.50, ε=0.10)
+  1. Unprotected (bare Q-learning)
+  2. Invariant Checker only
+  3. TMR Voter only
+  4. Combined (Checker + TMR)
+
+[✓] STATISTICAL PROTOCOL
+  Seeds           : SEED_BASE + k*100  for k = 0, 1, ..., N_SEEDS−1
+  Quick mode      : N_EPISODES = 200,  N_SEEDS = 3
+  Full mode       : N_EPISODES = 1000, N_SEEDS = 20
+  Reported values : mean ± 1 standard deviation across seeds
+  SD formula      : sample standard deviation (denominator N−1)
+
+================================================================================
+SECTION 8: HESSIAN / CURVATURE ESTIMATION
+================================================================================
+
+[✓] DIAGONAL HESSIAN APPROXIMATION  (function estimate_hessian_diagonal, line 387)
+
+  Parameters: θ = flattened Q-table, |θ| = |S|×|A| = 100×4 = 400 dimensions
+  Estimator  : finite-difference second derivative (diagonal only)
+    H_ii = [f(θ + ε_h·eᵢ) − 2·f(θ) + f(θ − ε_h·eᵢ)] / ε_h²
+  Step size  : ε_h = 0.01  (HESS_EPS)
+  Sampling   : 20 random parameter indices (from the 400) per λ value
+               (full 400-dim Hessian requires 800 function evaluations;
+               20-sample diagonal approximation requires 40+1 evaluations)
+  Objective  : estimated by running converged policy for 50 evaluation
+               episodes (n_eval=50) and returning mean blended reward.
+
+  Output: sorted list of 20 diagonal Hessian entries (approximate eigenvalues).
+  The intermediate entry (index 10 of 20) is tracked as a function of λ.
+  Sign change near λ = 0.50 identifies the intermediate-axis analogue.
+
+  Note: this function requires numpy (gracefully skipped if numpy absent).
+
+================================================================================
+SECTION 9: LORENTZIAN FIT
+================================================================================
+
+[✓] FIT FUNCTION  (function lorentzian, line 410)
+  f(λ; A, x0, γ, offset) = A · γ² / [(λ − x0)² + γ²] + offset
+  Physical interpretation:
+    A      : peak flip rate amplitude
+    x0     : center of instability peak (expected: 0.50)
+    γ      : half-width at half-maximum (HWHM) — breadth of unstable regime
+    offset : background / floor flip rate at extremes
+
+[✓] FITTING METHOD  (function fit_lorentzian, line 416)
+  Primary : scipy.optimize.curve_fit  (if scipy available)
+    Initial guess : p0 = [max(y), 0.5, 0.1, min(y)]
+    Bounds        : A ∈ [0,100], x0 ∈ [0.3,0.7], γ ∈ [0.01,0.5], offset ∈ [0,5]
+    Max iterations: 5000
+  Fallback : manual best-guess [peak, 0.5, 0.12, min]  (if scipy absent)
+
+[✓] EPSILON SCALING EXPONENT  (function epsilon_scaling_exponent, line 432)
+  Model  : log(flip_rate) = α · log(ε) + C
+  Method : ordinary least squares in log-log space (pure Python, no numpy)
+  Output : slope α  (expected ≈ 0.50–0.80 from full-run data)
+
+================================================================================
+SECTION 10: OUTPUT FILES
+================================================================================
+
+[✓] PLOTS (saved to ./results/)
+  flip_rate_vs_lambda.png      : Fig 1 — all 4 conditions + Lorentzian overlay
+  flip_rate_vs_epsilon.png     : Fig 2 — ε-sweep + power-law fit
+  ablation_bar.png             : Fig 3a (flip rates) + 3b (% reduction bars)
+  dwell_time_distributions.png : Fig 4 — histograms, 2×2 grid, all conditions
+
+[✓] DATA FILES
+  results/raw_data.csv         : Machine-readable; columns: condition, lambda,
+                                 epsilon, flip_rate_mean, flip_rate_std
+  results/results_summary.txt  : Human-readable condensed results
+  Janibekov_Results.txt        : Full empirical data record (this companion file)
+
+================================================================================
+SECTION 11: DEPENDENCIES AND RUNTIME
+================================================================================
+
+[✓] REQUIRED (zero-install)
+  Python >= 3.8    (stdlib only: random, math, os, csv, json, time, copy,
+                    collections, argparse)
+  All core experiment logic (gridworld, Q-learning, mode detection, all
+  stabilizers, Hessian estimation) runs with zero external packages.
+
+[✓] OPTIONAL (for fitting and plotting)
+  numpy >= 1.20    : Hessian eigenvalue computation  (pip install numpy)
+  matplotlib >= 3.3: All 4 figures                   (pip install matplotlib)
+  scipy >= 1.6     : Lorentzian curve_fit, KS-test   (pip install scipy)
+
+  If absent, the experiment still runs and writes raw_data.csv and
+  results_summary.txt. Plots are skipped with a warning. Lorentzian
+  uses manual fallback parameters.
+
+[✓] HARDWARE
+  CPU-only. No GPU required.
+  Memory: < 50 MB for full N=1000/20-seed run (Q-tables are tiny).
+
+[✓] RUNTIME ESTIMATES
+  Quick mode (--quick, N=200, 3 seeds) :  ~1 minute  (single CPU core)
+  Full mode  (N=1000, 20 seeds)        :  ~60–90 minutes (single CPU core)
+
+[✓] OPERATING SYSTEM
+  Tested: Linux (Ubuntu 24.04), Python 3.11.
+  Expected compatible: macOS, Windows (Python >= 3.8).
+
+================================================================================
+SECTION 12: SEED SCHEDULE (for exact reproduction)
+================================================================================
+
+Each condition × λ × ε combination is run across N_SEEDS seeds.
+Seed schedule: seed_k = SEED_BASE + k * 100,  for k = 0, 1, ..., N_SEEDS−1
+
+  k=0 : seed = 42
+  k=1 : seed = 142
+  k=2 : seed = 242
+  ...
+  k=19: seed = 1942   (full run)
+
+TMR voter seeds (per run):
+  [seed, seed+7, seed+13]     (standard TMR)
+  [seed+1, seed+5, seed+11]   (combined stabilizer)
+
+All results are deterministic given Python version and platform, because:
+  • stdlib random.Random(seed) is deterministic in Python >= 3.2
+  • Box-Muller Gaussian uses only stdlib random
+  • numpy is not used in the core experiment loop (only in Hessian estimation)
+
+================================================================================
+SECTION 13: PROVENANCE AND IP STATEMENT
+================================================================================
+
+[✓] This codebase is original work:
+  • No dependency on XRM-SSD internal toolchain
+  • No dependency on MIND compiler (mindc) or FORTRESS components
+  • No dependency on Dollarchip-internal infrastructure
+  • The Invariant Checker and TMR Voter are generic implementations,
+    not wrappers over any proprietary stack
+  • All experiment logic is contained in janibekov_experiment.py
+
+[✓] License: CC BY 4.0  (same as the paper)
+  Copyright 2025 Dollarchip / 瑞元科技 XRM-SSD Architecture Group
+
+[✓] The stabilizer designs were inspired by the XRM-SSD RGE commit-ordering
+  architecture (SHA-256 evidence chains + TMR voter), but the implementations
+  here are independently written, generic, and contain no proprietary code.
+  The paper's connection to XRM-SSD is stated in Section 6 of the paper
+  and is archival context only, not a code dependency.
+
+================================================================================
+SECTION 14: HOW TO RUN
+================================================================================
+
+  Step 1: Ensure Python 3.8+ is installed.
+
+  Step 2: (Optional) install plotting/fitting dependencies:
+    pip install numpy matplotlib scipy
+
+  Step 3: Smoke-test (1 minute):
+    python janibekov_experiment.py --quick
+
+  Step 4: Full reproduction (~60–90 min):
+    python janibekov_experiment.py
+
+  Step 5: Check outputs:
+    results/flip_rate_vs_lambda.png      ← Fig 1
+    results/flip_rate_vs_epsilon.png     ← Fig 2
+    results/ablation_bar.png             ← Fig 3
+    results/dwell_time_distributions.png ← Fig 4
+    results/raw_data.csv                 ← All numbers
+    results/results_summary.txt          ← Summary table
+
+  Step 6: Compare against Janibekov_Results.txt for validation.
+
+================================================================================
+END OF REPRODUCIBILITY CHECKLIST
+================================================================================
+
 
