@@ -1,0 +1,31 @@
+This is the Uncertainty threshold optimization version report.
+
+Version | Average Latency | Asynchronous Rate | Packet Packing Rate | Success Rate | Rating
+
+V1 | 237ms | 11% | 33% | 100% | ⭐⭐
+
+V5 | 1.92ms | 19% | 41% | 100% | ⭐⭐⭐⭐⭐
+
+V6 | 1.84ms | 12% | 50% | 100% | ⭐⭐⭐⭐⭐
+
+V7 | 1.35ms | 3% | 61% | 100% | ⭐⭐⭐⭐⭐
+
+V8 | 1.03ms | 26% | 39% | 100% | ⭐⭐⭐⭐⭐
+
+Key Insights and Trends
+
+Exceptional Latency Optimization: Latency has plummeted from 23.7ms in V1 to 1.03ms in V8 (a 23x improvement), reaching near-limit ultra-low latency levels, ideal for high-frequency trading, real-time decision-making, or on-chain execution.
+
+Batch vs. Async Trade-offs:
+
+V7 performs best with a 61% batch rate, suitable for cost control and maximizing throughput.
+
+V8 shows significant improvement with a 26% async rate, coupled with the lowest latency, suitable for scenarios requiring extremely fast response times.
+
+100% Success Rate Consistently Maintained: All versions are extremely stable, a remarkable achievement for Agentic systems.
+
+Overall Rating: All versions after V5 receive a perfect score of ⭐⭐⭐⭐⭐, but with different focuses:
+
+V7 → Most Balanced Recommendation (Batch-driven + Extremely Low Latency).
+
+V8 → Speed-Priority King (Lowest Latency + Improved Async Performance).
