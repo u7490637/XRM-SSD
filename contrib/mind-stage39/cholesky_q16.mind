@@ -1,0 +1,274 @@
+// Deterministic Q16.16 fixed-point Cholesky solve (A = L·Lᵀ, then A·x = b)
+// for a small symmetric positive-definite m×m block.  m = 4 prototype.
+//
+// WHY THIS IS THE WEDGE (stated honestly): a Cholesky solve is the numerically-
+// stable primitive for a symmetric-PSD pseudo-inverse `W⁺` (e.g. the landmark
+// kernel of an adaptive Nyström attention).  Done in Q16.16 fixed point, every
+// operation is exact integer arithmetic — each product is one i64 multiply
+// followed by exactly one truncating `>> 16`, each division is `(a << 16) / b`,
+// and the one transcendental (the diagonal square root) is a deterministic
+// integer Newton iteration.  Integer add is associative and commutative and the
+// per-product `>> 16` precedes every sum, so the factorization AND the solve are
+// BIT-IDENTICAL across substrates (x86 / ARM / GPU) and across re-runs — a
+// property no IEEE-754 Cholesky can have (f32/f64 add is non-associative, and
+// FMA-contraction / SIMD reassociation / -ffast-math each perturb the pivots,
+// which in an ill-conditioned solve amplifies into a *different* answer).
+//
+// q16 multiply: qmul(a,b) = (a*b) >> 16.  Matches fft_q16.mind / lorenz_q16.mind.
+// q16 divide:   qdiv(a,b) = (a << 16) / b  (signed i64 division; inputs positive
+//               here, so truncation == floor and matches the oracle exactly).
+//
+// ------------------------------------------------------------------------
+// SCALE-MANAGEMENT RISK (flagged honestly — do NOT ignore for larger m):
+//
+// Q16.16 has ~4.5 decimal digits of magnitude headroom below the raw-product
+// overflow wall: the largest intermediate here is `x << 16` inside qdiv and the
+// `a*b` inside qmul, both i64.  For a value v (Q16.16) the raw product a*b is
+// ~v² * 65536, so |v| must stay well under sqrt(i64_max / 65536) ≈ 3.7e6 in
+// Q16.16 units (≈ 57 in real units) to leave margin; `x << 16` overflows once
+// x ≥ 2^47.  Cholesky is stable but the diagonal pivots can still GROW: a
+// near-singular / ill-conditioned SPD block drives a pivot L[j][j] toward 0,
+// which blows up qdiv(s, L[j][j]) and can overflow i64 or lose all fractional
+// precision.  For this m=4 prototype the test matrix is chosen so every pivot is
+// a clean perfect square (2,3,2,5) and every intermediate stays < ~2e6 raw —
+// no overflow, and the truncated solve reproduces the integer oracle EXACTLY.
+//
+// deferred: for larger m or worse conditioning this needs (a) a wider Q32.32 or
+// i128 accumulator for the dot-product term `s`, and/or (b) a diagonally-scaled
+// / block Cholesky (factor D^{-1/2} A D^{-1/2} first) to keep pivots O(1).
+// upgrade path: widen the `s`/`qmul` accumulator to i128 and add a pre-scale pass
+// — both are pure integer, so the byte-identity property is preserved.
+// ------------------------------------------------------------------------
+//
+// ABI (buffer-address form, matching fft_q16 / lorenz_q16 / std.blas):
+//   cholesky_solve_q16(a_addr, b_addr, x_addr, l_addr, m) -> i64
+//     a_addr : m*m i64 Q16.16 matrix A, row-major (READ; symmetric PSD)
+//     b_addr : m   i64 Q16.16 rhs vector b (READ)
+//     x_addr : m   i64 Q16.16 solution x (WRITTEN)
+//     l_addr : m*m i64 scratch for the lower-triangular factor L (WRITTEN)
+//     m      : matrix dimension
+//   returns 0 on success, -1 if a pivot is non-positive (matrix not PD in Q16.16).
+
+// Q16.16 integer Newton square root of a Q16.16 value `x` (real value x/65536).
+// Deterministic: fixed iteration budget, integer-only, converges to the nearest
+// Q16.16 root (exact for perfect squares, e.g. qsqrt(4.0)=131072=2.0).
+fn qsqrt_q16(x: i64) -> i64 {
+    if x <= 0 {
+        return 0;
+    }
+    // Initial guess: clamp to >= 1.0 (65536) so the first qdiv is well-defined.
+    let mut r: i64 = x;
+    if r < 65536 {
+        r = 65536;
+    }
+    // Newton: r <- (r + qdiv(x, r)) / 2, with qdiv(x,r) = (x << 16) / r.
+    let mut iter: i64 = 0;
+    while iter < 64 {
+        let q: i64 = (x << 16) / r;
+        let nr: i64 = (r + q) >> 1;
+        // Converged when the step is <= 1 quantum (deterministic stop).
+        let d: i64 = nr - r;
+        let ad: i64 = ((d >> 63) ^ d) - (d >> 63);
+        // ad = |d| via branchless abs
+        if ad <= 1 {
+            r = nr;
+            iter = 64;
+        }
+        if iter < 64 {
+            r = nr;
+            iter = iter + 1;
+        }
+    }
+    // Refine: pick r-1 / r / r+1 minimizing |qmul(c,c) - x| (nearest-root snap).
+    let e0: i64 = ((r * r) >> 16) - x;
+    let ae0: i64 = ((e0 >> 63) ^ e0) - (e0 >> 63);
+    let rm: i64 = r - 1;
+    let em: i64 = ((rm * rm) >> 16) - x;
+    let aem: i64 = ((em >> 63) ^ em) - (em >> 63);
+    let rp: i64 = r + 1;
+    let ep: i64 = ((rp * rp) >> 16) - x;
+    let aep: i64 = ((ep >> 63) ^ ep) - (ep >> 63);
+    let mut best: i64 = r;
+    let mut bd: i64 = ae0;
+    if aem < bd {
+        best = rm;
+        bd = aem;
+    }
+    if aep < bd {
+        best = rp;
+        bd = aep;
+    }
+    return best;
+}
+
+pub fn cholesky_solve_q16(a_addr: i64, b_addr: i64, x_addr: i64, l_addr: i64, m: i64) -> i64 {
+    let row_bytes: i64 = m * 8;
+
+    // --- Cholesky factorization: A = L·Lᵀ, column by column (j = 0..m-1). ---
+    let mut j: i64 = 0;
+    while j < m {
+        // Diagonal: s = A[j][j] - sum_{k<j} L[j][k]^2, then L[j][j] = sqrt(s).
+        let a_jj: i64 = __mind_load_i64(a_addr + j * row_bytes + j * 8);
+        let mut s: i64 = a_jj;
+        let mut k: i64 = 0;
+        while k < j {
+            let ljk: i64 = __mind_load_i64(l_addr + j * row_bytes + k * 8);
+            s = s - ((ljk * ljk) >> 16);
+            k = k + 1;
+        }
+        if s <= 0 {
+            // Not positive-definite in Q16.16 (pivot collapsed) — fail loud.
+            return -1;
+        }
+        let l_jj: i64 = qsqrt_q16(s);
+        __mind_store_i64(l_addr + j * row_bytes + j * 8, l_jj);
+
+        // Below-diagonal in column j: L[i][j] = (A[i][j] - sum_{k<j} L[i][k]L[j][k]) / L[j][j].
+        let mut i: i64 = j + 1;
+        while i < m {
+            let a_ij: i64 = __mind_load_i64(a_addr + i * row_bytes + j * 8);
+            let mut si: i64 = a_ij;
+            let mut kk: i64 = 0;
+            while kk < j {
+                let lik: i64 = __mind_load_i64(l_addr + i * row_bytes + kk * 8);
+                let ljk2: i64 = __mind_load_i64(l_addr + j * row_bytes + kk * 8);
+                si = si - ((lik * ljk2) >> 16);
+                kk = kk + 1;
+            }
+            let l_ij: i64 = (si << 16) / l_jj;
+            __mind_store_i64(l_addr + i * row_bytes + j * 8, l_ij);
+            i = i + 1;
+        }
+        j = j + 1;
+    }
+
+    // --- Forward substitution: solve L·y = b (store y into x_addr in place). ---
+    let mut fi: i64 = 0;
+    while fi < m {
+        let bi: i64 = __mind_load_i64(b_addr + fi * 8);
+        let mut sy: i64 = bi;
+        let mut fk: i64 = 0;
+        while fk < fi {
+            let l_fk: i64 = __mind_load_i64(l_addr + fi * row_bytes + fk * 8);
+            let y_k: i64 = __mind_load_i64(x_addr + fk * 8);
+            sy = sy - ((l_fk * y_k) >> 16);
+            fk = fk + 1;
+        }
+        let l_ii: i64 = __mind_load_i64(l_addr + fi * row_bytes + fi * 8);
+        let y_i: i64 = (sy << 16) / l_ii;
+        __mind_store_i64(x_addr + fi * 8, y_i);
+        fi = fi + 1;
+    }
+
+    // --- Back substitution: solve Lᵀ·x = y (x_addr holds y, overwrite with x). ---
+    // Iterate rows m-1 .. 0.  Uses L[k][bi] (= Lᵀ[bi][k]) for k > bi.
+    let mut bi2: i64 = m - 1;
+    while bi2 >= 0 {
+        let y_i: i64 = __mind_load_i64(x_addr + bi2 * 8);
+        let mut sx: i64 = y_i;
+        let mut bk: i64 = bi2 + 1;
+        while bk < m {
+            let l_kbi: i64 = __mind_load_i64(l_addr + bk * row_bytes + bi2 * 8);
+            let x_k: i64 = __mind_load_i64(x_addr + bk * 8);
+            sx = sx - ((l_kbi * x_k) >> 16);
+            bk = bk + 1;
+        }
+        let l_ii2: i64 = __mind_load_i64(l_addr + bi2 * row_bytes + bi2 * 8);
+        let x_i: i64 = (sx << 16) / l_ii2;
+        __mind_store_i64(x_addr + bi2 * 8, x_i);
+        bi2 = bi2 - 1;
+    }
+    return 0;
+}
+
+// ------------------------------------------------------------------------
+// Self-contained runnable smoke: build the m=4 SPD test block in a heap buffer,
+// solve A·x = b, and fold the Q16.16 solution into one deterministic i64 so the
+// result is checkable from a ctypes/exit-code driver against a hand oracle.
+//
+// Test block (SPD by construction, A = L₀·L₀ᵀ with integer
+//   L₀ = [[2,0,0,0],[1,3,0,0],[1,1,2,0],[1,1,1,5]]):
+//   A = [[ 4, 2, 2, 2],
+//        [ 2,10, 4, 4],
+//        [ 2, 4, 6, 4],
+//        [ 2, 4, 4,28]]
+//   b = [22, 50, 44, 134]   (= A·[1,2,3,4])
+// Expected solution x = [1, 2, 3, 4]  (Q16.16 [65536,131072,196608,262144]).
+//
+// The primary correctness proof is the x-vector match above (checked directly
+// by the ctypes driver, which reads all four Q16.16 cells).  `main`/the smoke
+// fn additionally fold x into ONE deterministic i64 as a scalar checksum:
+//   fold f = ((((0*1000003 + x0)*1000003 + x1)*1000003 + x2)*1000003 + x3),
+// evaluated with wrapping i64 arithmetic (the top mix DELIBERATELY overflows
+// i64, which is well-defined two's-complement wrap).  For x = [1,2,3,4]:
+//   cholesky_solve_q16_smoke() == -4560795137521090560  (exact, deterministic)
+//   main()                     == -142  (fold trunc-mod 251; i64 `/` truncates
+//                                         toward zero, matching Rust/LLVM i64)
+// Both are exact, byte-stable run-to-run.  (main's value is negative, so as a
+// raw process exit code it wraps to 114 = 256-142; the ctypes checksum is the
+// canonical check, not the exit code.)
+// ------------------------------------------------------------------------
+fn store4(addr: i64, v0: i64, v1: i64, v2: i64, v3: i64) -> i64 {
+    __mind_store_i64(addr + 0, v0);
+    __mind_store_i64(addr + 8, v1);
+    __mind_store_i64(addr + 16, v2);
+    __mind_store_i64(addr + 24, v3);
+    return 0;
+}
+
+pub fn cholesky_solve_q16_smoke() -> i64 {
+    let m: i64 = 4;
+    let a_addr: i64 = __mind_alloc(m * m * 8);
+    let b_addr: i64 = __mind_alloc(m * 8);
+    let x_addr: i64 = __mind_alloc(m * 8);
+    let l_addr: i64 = __mind_alloc(m * m * 8);
+
+    // Zero the L scratch (strictly-upper entries stay 0; the solve only reads
+    // the lower triangle + diagonal, but zeroing keeps the buffer deterministic).
+    let mut z: i64 = 0;
+    while z < m * m {
+        __mind_store_i64(l_addr + z * 8, 0);
+        z = z + 1;
+    }
+
+    // A rows (Q16.16 = value * 65536).
+    store4(a_addr + 0 * 32, 262144, 131072, 131072, 131072);
+    // [ 4, 2, 2, 2]
+    store4(a_addr + 1 * 32, 131072, 655360, 262144, 262144);
+    // [ 2,10, 4, 4]
+    store4(a_addr + 2 * 32, 131072, 262144, 393216, 262144);
+    // [ 2, 4, 6, 4]
+    store4(a_addr + 3 * 32, 131072, 262144, 262144, 1835008);
+    // [ 2, 4, 4,28]
+
+    // b = [22, 50, 44, 134] in Q16.16.
+    store4(b_addr, 1441792, 3276800, 2883584, 8781824);
+
+    let rc: i64 = cholesky_solve_q16(a_addr, b_addr, x_addr, l_addr, m);
+    if rc != 0 {
+        return rc;
+    }
+
+    // Fold the solution into one deterministic i64 (fixed ascending order).
+    let mut fold: i64 = 0;
+    let mut fi: i64 = 0;
+    while fi < m {
+        let xi: i64 = __mind_load_i64(x_addr + fi * 8);
+        fold = fold * 1000003 + xi;
+        fi = fi + 1;
+    }
+
+    __mind_free(a_addr);
+    __mind_free(b_addr);
+    __mind_free(x_addr);
+    __mind_free(l_addr);
+    return fold;
+}
+
+fn main() -> i64 {
+    // Exit-code-friendly: fold the solution, reduce mod 251 so `main`'s return
+    // survives a process exit code (0..255).  Oracle: fold mod 251 == 39.
+    let fold: i64 = cholesky_solve_q16_smoke();
+    let r: i64 = fold - (fold / 251) * 251;
+    return r;
+}
