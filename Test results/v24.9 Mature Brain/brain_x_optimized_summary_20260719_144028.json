@@ -1,0 +1,13 @@
+{
+  "test_name": "V24.9 Mature Brain-X - 策略多樣性 + 鏈上優化版",
+  "total_cycles": 100,
+  "success_rate": 100.0,
+  "last_20_success_rate": 100.0,
+  "avg_total_time_ms": 133.49294662475586,
+  "p95_total_time_ms": 291.70846939086914,
+  "rag_hit_rate": 0.96,
+  "agent_confidence": 0.95,
+  "batched_rate": 28.999999999999996,
+  "async_rate": 13.0,
+  "strategy_diversity": 7
+}
