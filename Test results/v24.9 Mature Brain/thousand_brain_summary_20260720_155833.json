@@ -1,0 +1,9 @@
+{
+  "test_name": "V24.9 Mature Brain-X 千腦串聯摘要",
+  "num_brains": 1000,
+  "total_cycles": 10000,
+  "success_rate": 100.0,
+  "avg_latency_ms": 1.0886295124053942,
+  "p95_latency_ms": 2.035379409790039,
+  "throughput_tps": 945.0899712717078
+}
