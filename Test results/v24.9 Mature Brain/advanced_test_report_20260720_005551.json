@@ -1,0 +1,242 @@
+{
+  "test_info": {
+    "test_name": "V24.9 Mature Brain-X Advanced Testing Kit",
+    "total_tests": 8,
+    "total_cycles": 800,
+    "timestamp": "2026-07-20T00:55:51.660017",
+    "duration_seconds": 2.4634549617767334
+  },
+  "test_results": {
+    "memory": {
+      "description": "Long-term memory ability",
+      "result": {
+        "cycles": 100,
+        "total_memory": 100,
+        "successful_memory": 100,
+        "memory_success_rate": 1.0,
+        "best_strategy": "hybrid",
+        "first_half_strategies": 7,
+        "second_half_strategies": 3,
+        "retained_strategies": 3,
+        "retention_rate": 0.42857142857142855,
+        "confidence": 0.34
+      },
+      "time_seconds": 0.31862497329711914,
+      "status": "success"
+    },
+    "adversarial": {
+      "description": "Adaptive to adversarial markets",
+      "result": {
+        "cycles": 100,
+        "successful_cycles": 100,
+        "success_rate": 1.0,
+        "avg_confidence": 0.34,
+        "strategies_used": 3,
+        "market_types": [
+          "black_swan",
+          "panic_sell",
+          "manipulation",
+          "flash_crash",
+          "liquidity_crisis"
+        ],
+        "avg_latency_ms": 0.7402801513671875
+      },
+      "time_seconds": 0.13787007331848145,
+      "status": "success"
+    },
+    "forgetting": {
+      "description": "Catastrophic forgetting",
+      "result": {
+        "cycles": 100,
+        "early_strategies": 7,
+        "mid_strategies": 4,
+        "late_strategies": 2,
+        "forgotten_count": 5,
+        "forgotten_strategies": [
+          "mean_reversion",
+          "momentum",
+          "trend",
+          "breakout",
+          "adaptive"
+        ],
+        "forgetting_rate": 0.7142857142857143,
+        "strategy_diversity": 7
+      },
+      "time_seconds": 0.15160775184631348,
+      "status": "success"
+    },
+    "generalization": {
+      "description": "Cross-market generalization",
+      "result": {
+        "train_test_pairs": 4,
+        "avg_transfer_success": 1.0,
+        "details": {
+          "strong_trend_to_breakout": {
+            "train_market": "strong_trend",
+            "test_market": "breakout",
+            "success_rate": 1.0,
+            "avg_confidence": 0.34
+          },
+          "strong_trend_to_high_volatility": {
+            "train_market": "strong_trend",
+            "test_market": "high_volatility",
+            "success_rate": 1.0,
+            "avg_confidence": 0.32
+          },
+          "ranging_to_breakout": {
+            "train_market": "ranging",
+            "test_market": "breakout",
+            "success_rate": 1.0,
+            "avg_confidence": 0.32
+          },
+          "ranging_to_high_volatility": {
+            "train_market": "ranging",
+            "test_market": "high_volatility",
+            "success_rate": 1.0,
+            "avg_confidence": 0.32
+          }
+        }
+      },
+      "time_seconds": 0.5413925647735596,
+      "status": "success"
+    },
+    "composition": {
+      "description": "Strategy Combination and Synergy",
+      "result": {
+        "strategies_tested": 5,
+        "best_strategy": "momentum",
+        "results": {
+          "momentum": {
+            "success_rate": 1.0,
+            "avg_latency_ms": 1.4319087982177736,
+            "avg_confidence": 0.8614124253334541
+          },
+          "grid": {
+            "success_rate": 1.0,
+            "avg_latency_ms": 1.9169371604919438,
+            "avg_confidence": 0.95
+          },
+          "breakout": {
+            "success_rate": 1.0,
+            "avg_latency_ms": 1.2072158813476563,
+            "avg_confidence": 0.9445464749109906
+          },
+          "mean_reversion": {
+            "success_rate": 1.0,
+            "avg_latency_ms": 0.9485960006713867,
+            "avg_confidence": 0.7803790273476352
+          },
+          "hybrid": {
+            "success_rate": 1.0,
+            "avg_latency_ms": 1.6531565666198733,
+            "avg_confidence": 0.95
+          }
+        }
+      },
+      "time_seconds": 0.8476645946502686,
+      "status": "success"
+    },
+    "prediction": {
+      "description": "Time series forecasting",
+      "result": {
+        "cycles": 100,
+        "successful_decisions": 100,
+        "failed_decisions": 0,
+        "accuracy": 1.0,
+        "avg_confidence_success": 0.5071184259057702,
+        "avg_confidence_failure": 0,
+        "confidence_gap": 0.5071184259057702
+      },
+      "time_seconds": 0.1355597972869873,
+      "status": "success"
+    },
+    "evolution": {
+      "description": "Strategy Evolution",
+      "result": {
+        "cycles": 100,
+        "total_strategies": 7,
+        "strategy_counts": {
+          "trend": 4,
+          "breakout": 16,
+          "momentum": 5,
+          "hybrid": 53,
+          "grid": 15,
+          "adaptive": 6,
+          "mean_reversion": 1
+        },
+        "dominant_strategy": "hybrid",
+        "diversity_over_time": [
+          6,
+          5,
+          3,
+          2,
+          2
+        ],
+        "new_strategies_emerged": 0
+      },
+      "time_seconds": 0.15326952934265137,
+      "status": "success"
+    },
+    "self_improvement": {
+      "description": "Self-learning and improvement",
+      "result": {
+        "phases": [
+          {
+            "phase": 1,
+            "cycles": 20,
+            "success_rate": 1.0,
+            "avg_latency_ms": 1.3025641441345215,
+            "avg_confidence": 0.7062119993170038,
+            "strategy_diversity": 6
+          },
+          {
+            "phase": 2,
+            "cycles": 20,
+            "success_rate": 1.0,
+            "avg_latency_ms": 2.252721214294434,
+            "avg_confidence": 0.9255934531197239,
+            "strategy_diversity": 5
+          },
+          {
+            "phase": 3,
+            "cycles": 20,
+            "success_rate": 1.0,
+            "avg_latency_ms": 1.152879238128662,
+            "avg_confidence": 0.63386294223503,
+            "strategy_diversity": 3
+          },
+          {
+            "phase": 4,
+            "cycles": 20,
+            "success_rate": 1.0,
+            "avg_latency_ms": 0.8216261863708496,
+            "avg_confidence": 0.31600000000000006,
+            "strategy_diversity": 3
+          },
+          {
+            "phase": 5,
+            "cycles": 20,
+            "success_rate": 1.0,
+            "avg_latency_ms": 0.5305171012878418,
+            "avg_confidence": 0.31800000000000006,
+            "strategy_diversity": 1
+          }
+        ],
+        "improvement": {
+          "success_rate_change": 0.0,
+          "latency_change_ms": -0.7720470428466797,
+          "confidence_change": -0.3882119993170038,
+          "diversity_change": -5
+        },
+        "learning_rate": 0.0
+      },
+      "time_seconds": 0.15956330299377441,
+      "status": "success"
+    }
+  },
+  "overall_statistics": {
+    "passed_tests": 8,
+    "failed_tests": 0,
+    "overall_success_rate": 0.8095238095238096
+  }
+}
