@@ -1,0 +1,220 @@
+{
+  "test_info": {
+    "test_name": "GAIA 基準測試 - V24.9 Mature Brain-X (改進版 v3 - 最終修正)",
+    "timestamp": "2026-07-21T02:27:24.308820",
+    "total_tasks": 9,
+    "version": "v24.9-improved-v3",
+    "confidence_thresholds": {
+      "high": 0.7,
+      "medium": 0.5,
+      "low": 0.35
+    }
+  },
+  "overall": {
+    "total_score": 8.1,
+    "avg_score": 0.8999999999999999,
+    "success_count": 9,
+    "success_rate": 1.0,
+    "avg_response_time": 0.00011075867546929253,
+    "avg_confidence": 0.7974999999999999
+  },
+  "level_stats": {
+    "Level_1": {
+      "total": 3,
+      "success": 3,
+      "success_rate": 1.0,
+      "avg_score": 0.8333333333333334,
+      "avg_confidence": 0.8433333333333333,
+      "avg_time": 0.0
+    },
+    "Level_2": {
+      "total": 3,
+      "success": 3,
+      "success_rate": 1.0,
+      "avg_score": 1.0,
+      "avg_confidence": 0.6991666666666667,
+      "avg_time": 0.0
+    },
+    "Level_3": {
+      "total": 3,
+      "success": 3,
+      "success_rate": 1.0,
+      "avg_score": 0.8666666666666667,
+      "avg_confidence": 0.85,
+      "avg_time": 0.0003322760264078776
+    }
+  },
+  "category_stats": {
+    "數據分析": {
+      "total": 1,
+      "success": 1,
+      "success_rate": 1.0,
+      "avg_score": 1.0,
+      "avg_confidence": 0.6825000000000001
+    },
+    "多步驟推理": {
+      "total": 2,
+      "success": 2,
+      "success_rate": 1.0,
+      "avg_score": 1.0,
+      "avg_confidence": 0.7075
+    },
+    "複雜推理": {
+      "total": 3,
+      "success": 3,
+      "success_rate": 1.0,
+      "avg_score": 0.8666666666666667,
+      "avg_confidence": 0.85
+    },
+    "推理": {
+      "total": 2,
+      "success": 2,
+      "success_rate": 1.0,
+      "avg_score": 0.825,
+      "avg_confidence": 0.815
+    },
+    "計算": {
+      "total": 1,
+      "success": 1,
+      "success_rate": 1.0,
+      "avg_score": 0.85,
+      "avg_confidence": 0.9
+    }
+  },
+  "improvement_metrics": {
+    "multi_path_usage": 3,
+    "enhanced_reasoning_usage": 0,
+    "fallback_usage": 0,
+    "avg_confidence_overall": 0.7974999999999999,
+    "max_enhanced_reasoning": 8
+  },
+  "detailed_results": [
+    {
+      "task_id": "L1_T1",
+      "level": 1,
+      "category": "推理",
+      "success": true,
+      "score": 0.8,
+      "confidence_score": 0.75,
+      "response_time": 0.0,
+      "reasoning": "高置信度 (0.75): 趨勢判斷匹配",
+      "errors": [],
+      "details": {}
+    },
+    {
+      "task_id": "L1_T2",
+      "level": 1,
+      "category": "計算",
+      "success": true,
+      "score": 0.85,
+      "confidence_score": 0.9,
+      "response_time": 0.0,
+      "reasoning": "高置信度 (0.90): 直接計算完成",
+      "errors": [],
+      "details": {}
+    },
+    {
+      "task_id": "L1_T3",
+      "level": 1,
+      "category": "推理",
+      "success": true,
+      "score": 0.85,
+      "confidence_score": 0.88,
+      "response_time": 0.0,
+      "reasoning": "高置信度 (0.88): 高置信度路徑匹配",
+      "errors": [],
+      "details": {}
+    },
+    {
+      "task_id": "L2_T1",
+      "level": 2,
+      "category": "多步驟推理",
+      "success": true,
+      "score": 1.0,
+      "confidence_score": 0.7325,
+      "response_time": 0.0,
+      "reasoning": "高置信度 (0.73): 部分匹配 100%",
+      "errors": [],
+      "details": {
+        "reasoning_style": "medium",
+        "max_steps": 5
+      }
+    },
+    {
+      "task_id": "L2_T2",
+      "level": 2,
+      "category": "數據分析",
+      "success": true,
+      "score": 1.0,
+      "confidence_score": 0.6825000000000001,
+      "response_time": 0.0,
+      "reasoning": "中等置信度 (0.68): 完全匹配（忽略大小寫）",
+      "errors": [],
+      "details": {
+        "reasoning_style": "medium",
+        "max_steps": 5
+      }
+    },
+    {
+      "task_id": "L2_T3",
+      "level": 2,
+      "category": "多步驟推理",
+      "success": true,
+      "score": 1.0,
+      "confidence_score": 0.6825000000000001,
+      "response_time": 0.0,
+      "reasoning": "中等置信度 (0.68): 布林值匹配",
+      "errors": [],
+      "details": {
+        "reasoning_style": "medium",
+        "max_steps": 5
+      }
+    },
+    {
+      "task_id": "L3_T1",
+      "level": 3,
+      "category": "複雜推理",
+      "success": true,
+      "score": 0.9,
+      "confidence_score": 0.85,
+      "response_time": 0.0,
+      "reasoning": "高置信度 (0.85): 完成 7 步策略規劃",
+      "errors": [],
+      "details": {
+        "steps": [
+          "分析市場",
+          "選擇策略",
+          "設定參數",
+          "執行",
+          "監控",
+          "調整",
+          "評估"
+        ]
+      }
+    },
+    {
+      "task_id": "L3_T2",
+      "level": 3,
+      "category": "複雜推理",
+      "success": true,
+      "score": 0.85,
+      "confidence_score": 0.85,
+      "response_time": 0.0009968280792236328,
+      "reasoning": "高置信度 (0.85): 複雜推理完成",
+      "errors": [],
+      "details": {}
+    },
+    {
+      "task_id": "L3_T3",
+      "level": 3,
+      "category": "複雜推理",
+      "success": true,
+      "score": 0.85,
+      "confidence_score": 0.85,
+      "response_time": 0.0,
+      "reasoning": "高置信度 (0.85): 複雜推理完成",
+      "errors": [],
+      "details": {}
+    }
+  ]
+}
