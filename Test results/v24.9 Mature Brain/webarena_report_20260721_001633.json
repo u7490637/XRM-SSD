@@ -1,0 +1,214 @@
+{
+  "total_responses": 13,
+  "average_score": 96.38461538461539,
+  "max_score": 100.0,
+  "min_score": 92.5,
+  "results": [
+    {
+      "index": 0,
+      "task_type": "claim_reward",
+      "status": "success",
+      "total_score": 96.50000000000001,
+      "details": {
+        "format_score": 25.0,
+        "task_score": 30.0,
+        "data_score": 20.0,
+        "latency_score": 13.5,
+        "diversity_score": 8.000000000000002
+      },
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "index": 1,
+      "task_type": "execute_proposal",
+      "status": "success",
+      "total_score": 96.50000000000001,
+      "details": {
+        "format_score": 25.0,
+        "task_score": 30.0,
+        "data_score": 20.0,
+        "latency_score": 13.5,
+        "diversity_score": 8.000000000000002
+      },
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "index": 2,
+      "task_type": "propose_strategy",
+      "status": "success",
+      "total_score": 96.50000000000001,
+      "details": {
+        "format_score": 25.0,
+        "task_score": 30.0,
+        "data_score": 20.0,
+        "latency_score": 13.5,
+        "diversity_score": 8.000000000000002
+      },
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "index": 3,
+      "task_type": "stake_and_propose",
+      "status": "success",
+      "total_score": 96.50000000000001,
+      "details": {
+        "format_score": 25.0,
+        "task_score": 30.0,
+        "data_score": 20.0,
+        "latency_score": 13.5,
+        "diversity_score": 8.000000000000002
+      },
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "index": 4,
+      "task_type": "vote",
+      "status": "success",
+      "total_score": 98.5,
+      "details": {
+        "format_score": 25.0,
+        "task_score": 30.0,
+        "data_score": 20.0,
+        "latency_score": 13.5,
+        "diversity_score": 10.0
+      },
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "index": 5,
+      "task_type": "wait_and_observe",
+      "status": "success",
+      "total_score": 100.0,
+      "details": {
+        "format_score": 25.0,
+        "task_score": 30.0,
+        "data_score": 20.0,
+        "latency_score": 15.0,
+        "diversity_score": 10.0
+      },
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "index": 6,
+      "task_type": "claim_reward",
+      "status": "success",
+      "total_score": 98.5,
+      "details": {
+        "format_score": 25.0,
+        "task_score": 30.0,
+        "data_score": 20.0,
+        "latency_score": 13.5,
+        "diversity_score": 10.0
+      },
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "index": 7,
+      "task_type": "execute_proposal",
+      "status": "success",
+      "total_score": 95.5,
+      "details": {
+        "format_score": 25.0,
+        "task_score": 30.0,
+        "data_score": 20.0,
+        "latency_score": 13.5,
+        "diversity_score": 6.999999999999999
+      },
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "index": 8,
+      "task_type": "propose_strategy",
+      "status": "success",
+      "total_score": 95.5,
+      "details": {
+        "format_score": 25.0,
+        "task_score": 30.0,
+        "data_score": 20.0,
+        "latency_score": 13.5,
+        "diversity_score": 6.999999999999999
+      },
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "index": 9,
+      "task_type": "stake_and_propose",
+      "status": "success",
+      "total_score": 95.5,
+      "details": {
+        "format_score": 25.0,
+        "task_score": 27.0,
+        "data_score": 20.0,
+        "latency_score": 13.5,
+        "diversity_score": 10.0
+      },
+      "errors": [],
+      "warnings": [
+        "stake_and_propose 成功但缺少 proposal_id"
+      ]
+    },
+    {
+      "index": 10,
+      "task_type": "stake_and_propose",
+      "status": "success",
+      "total_score": 95.5,
+      "details": {
+        "format_score": 25.0,
+        "task_score": 30.0,
+        "data_score": 20.0,
+        "latency_score": 13.5,
+        "diversity_score": 6.999999999999999
+      },
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "index": 11,
+      "task_type": "vote",
+      "status": "success",
+      "total_score": 95.5,
+      "details": {
+        "format_score": 25.0,
+        "task_score": 30.0,
+        "data_score": 20.0,
+        "latency_score": 13.5,
+        "diversity_score": 6.999999999999999
+      },
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "index": 12,
+      "task_type": "wait_and_observe",
+      "status": "success",
+      "total_score": 92.5,
+      "details": {
+        "format_score": 25.0,
+        "task_score": 27.0,
+        "data_score": 20.0,
+        "latency_score": 13.5,
+        "diversity_score": 6.999999999999999
+      },
+      "errors": [],
+      "warnings": [
+        "wait_and_observe 置信度偏高，可能不合理"
+      ]
+    }
+  ],
+  "summary": {
+    "format_avg": 25.0,
+    "task_avg": 29.53846153846154,
+    "data_avg": 20.0,
+    "latency_avg": 13.615384615384615,
+    "diversity_avg": 8.23076923076923
+  }
+}
