@@ -1,0 +1,270 @@
+{
+  "test_info": {
+    "test_name": "V24.9 Mature Brain-X 進階測試套件 v6.1",
+    "total_tests": 8,
+    "timestamp": "2026-07-20T15:28:34.937898",
+    "duration_seconds": 1.6619677543640137,
+    "thresholds": {
+      "memory_retention": 0.8,
+      "forgetting_rate": 0.25,
+      "prediction_accuracy": 0.6,
+      "diversity_min": 3,
+      "learning_positive": 0.02,
+      "confidence_stability": -0.05,
+      "mode_collapse": 0.45
+    },
+    "v61_fixes": {
+      "learning_rate": "hybrid (latency + diversity)",
+      "force_diversity": "every 30 cycles",
+      "hybrid_penalty": "after 5 consecutive",
+      "mode_collapse_target": "< 45%"
+    }
+  },
+  "test_results": {
+    "memory": {
+      "description": "長期記憶保留率",
+      "result": {
+        "cycles": 150,
+        "total_memory": 150,
+        "successful_memory": 150,
+        "memory_success_rate": 1.0,
+        "best_strategy": "hybrid",
+        "first_half_strategies": 7,
+        "second_half_strategies": 7,
+        "retained_strategies": 7,
+        "retention_rate": 1.0,
+        "confidence": 0.7402059151131236
+      },
+      "time_seconds": 0.19506263732910156,
+      "status": "pass",
+      "key_metrics": {
+        "retention_rate": 1.0,
+        "memory_success_rate": 1.0
+      }
+    },
+    "forgetting": {
+      "description": "策略遺忘率",
+      "result": {
+        "cycles": 150,
+        "early_strategies": 7,
+        "late_strategies": 7,
+        "forgotten_count": 0,
+        "forgotten_strategies": [],
+        "forgetting_rate": 0.0,
+        "strategy_diversity": 7
+      },
+      "time_seconds": 0.2236034870147705,
+      "status": "pass",
+      "key_metrics": {
+        "forgetting_rate": 0.0,
+        "strategy_diversity": 7
+      }
+    },
+    "prediction": {
+      "description": "市場預測準確度",
+      "result": {
+        "cycles": 150,
+        "correct_predictions": 150,
+        "total_predictions": 150,
+        "accuracy": 1.0,
+        "confidence": 0.7386708974425727
+      },
+      "time_seconds": 0.18444299697875977,
+      "status": "pass",
+      "key_metrics": {
+        "accuracy": 1.0
+      }
+    },
+    "diversity": {
+      "description": "策略多樣性",
+      "result": {
+        "cycles": 100,
+        "total_strategies": 7,
+        "strategy_counts": {
+          "momentum": 5,
+          "trend": 6,
+          "breakout": 14,
+          "adaptive": 7,
+          "grid": 12,
+          "hybrid": 49,
+          "mean_reversion": 7
+        },
+        "dominant_strategy": "hybrid",
+        "dominant_strategy_ratio": 0.49,
+        "strategies_used": [
+          "momentum",
+          "trend",
+          "breakout",
+          "adaptive",
+          "grid",
+          "hybrid",
+          "mean_reversion"
+        ]
+      },
+      "time_seconds": 0.1286149024963379,
+      "status": "pass",
+      "key_metrics": {
+        "total_strategies": 7,
+        "dominant_strategy_ratio": 0.49
+      }
+    },
+    "learning": {
+      "description": "自我學習率",
+      "result": {
+        "phases": [
+          {
+            "phase": 1,
+            "success_rate": 1.0,
+            "avg_latency_ms": 1.1209487915039062,
+            "strategy_diversity": 7
+          },
+          {
+            "phase": 2,
+            "success_rate": 1.0,
+            "avg_latency_ms": 0.8774936199188232,
+            "strategy_diversity": 5
+          },
+          {
+            "phase": 3,
+            "success_rate": 1.0,
+            "avg_latency_ms": 0.9199678897857666,
+            "strategy_diversity": 6
+          }
+        ],
+        "learning_rate": 0.0,
+        "latency_improvement": 0.20098090171813965,
+        "final_confidence": 0.7346086028935438
+      },
+      "time_seconds": 0.16065716743469238,
+      "status": "fail",
+      "key_metrics": {
+        "learning_rate": 0.0,
+        "latency_improvement": 0.20098090171813965
+      }
+    },
+    "confidence": {
+      "description": "信心穩定性",
+      "result": {
+        "early_confidence_avg": 0.7127724453542419,
+        "late_confidence_avg": 0.6756506902870708,
+        "confidence_change": -0.03712175506717108,
+        "final_confidence": 0.7339351653602932,
+        "confidence_stability": true
+      },
+      "time_seconds": 0.1601574420928955,
+      "status": "pass",
+      "key_metrics": {
+        "confidence_change": -0.03712175506717108,
+        "final_confidence": 0.7339351653602932
+      }
+    },
+    "generalization": {
+      "description": "跨市場泛化",
+      "result": {
+        "train_test_pairs": 4,
+        "avg_transfer_success": 1.0,
+        "details": {
+          "strong_trend_to_breakout": {
+            "train_market": "strong_trend",
+            "test_market": "breakout",
+            "success_rate": 1.0,
+            "avg_confidence": 0.7020021665432068
+          },
+          "strong_trend_to_high_volatility": {
+            "train_market": "strong_trend",
+            "test_market": "high_volatility",
+            "success_rate": 1.0,
+            "avg_confidence": 0.7083757374588158
+          },
+          "ranging_to_breakout": {
+            "train_market": "ranging",
+            "test_market": "breakout",
+            "success_rate": 1.0,
+            "avg_confidence": 0.7086047539303542
+          },
+          "ranging_to_high_volatility": {
+            "train_market": "ranging",
+            "test_market": "high_volatility",
+            "success_rate": 1.0,
+            "avg_confidence": 0.7061691397614074
+          }
+        }
+      },
+      "time_seconds": 0.3879051208496094,
+      "status": "pass",
+      "key_metrics": {
+        "avg_transfer_success": 1.0
+      }
+    },
+    "mode_collapse": {
+      "description": "模式崩潰檢測",
+      "result": {
+        "phases": [
+          {
+            "phase": 1,
+            "strategy_counts": {
+              "trend": 6,
+              "momentum": 4,
+              "breakout": 14,
+              "grid": 11,
+              "hybrid": 8,
+              "mean_reversion": 7
+            },
+            "diversity": 6,
+            "dominant_ratio": 0.28
+          },
+          {
+            "phase": 2,
+            "strategy_counts": {
+              "breakout": 1,
+              "hybrid": 31,
+              "grid": 12,
+              "adaptive": 2,
+              "mean_reversion": 4
+            },
+            "diversity": 5,
+            "dominant_ratio": 0.62
+          },
+          {
+            "phase": 3,
+            "strategy_counts": {
+              "hybrid": 5,
+              "trend": 13,
+              "momentum": 2,
+              "grid": 12,
+              "adaptive": 1,
+              "mean_reversion": 11,
+              "breakout": 6
+            },
+            "diversity": 7,
+            "dominant_ratio": 0.26
+          }
+        ],
+        "total_strategies": 7,
+        "is_mode_collapsing": false,
+        "dominant_strategy_ratio": 0.26,
+        "strategy_counts_overall": {
+          "trend": 0,
+          "momentum": 0,
+          "breakout": 0,
+          "grid": 0,
+          "hybrid": 0,
+          "mean_reversion": 0,
+          "adaptive": 0
+        }
+      },
+      "time_seconds": 0.19975042343139648,
+      "status": "pass",
+      "key_metrics": {
+        "dominant_strategy_ratio": 0.26,
+        "total_strategies": 7
+      }
+    }
+  },
+  "overall_statistics": {
+    "passed_tests": 7,
+    "failed_tests": 1,
+    "error_tests": 0,
+    "pass_rate": 0.875
+  }
+}
