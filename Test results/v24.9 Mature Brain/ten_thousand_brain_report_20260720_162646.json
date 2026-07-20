@@ -1,0 +1,340 @@
+{
+  "test_info": {
+    "test_name": "V24.9 Mature Brain-X 萬腦串聯同步實測",
+    "num_brains": 10000,
+    "cycles_per_brain": 50000,
+    "total_cycles": 50000,
+    "timestamp": "2026-07-20T16:26:46.533426",
+    "duration_seconds": 59.05713653564453
+  },
+  "results": {
+    "successful_cycles": 50000,
+    "failed_cycles": 0,
+    "success_rate": 100.0,
+    "nodes_active": 10000
+  },
+  "performance": {
+    "avg_latency_ms": 1.1702372867965698,
+    "p95_latency_ms": 2.031564712524414,
+    "p99_latency_ms": 2.9935836791992188,
+    "min_latency_ms": 0.0,
+    "max_latency_ms": 4136.970281600952,
+    "throughput_tps": 846.6377297148838,
+    "nodes_per_second": 169.32754594297674
+  },
+  "strategy_distribution": {
+    "breakout": 16505,
+    "trend": 16729,
+    "momentum": 16766
+  },
+  "market_distribution": {
+    "strong_trend": 50000
+  },
+  "node_statistics": {
+    "avg_node_latency_ms": 1.1702372867965696,
+    "min_node_latency_ms": 0.0,
+    "max_node_latency_ms": 828.2504558563232
+  },
+  "detailed_nodes": [
+    {
+      "node_id": 0,
+      "cycles": 5,
+      "success": 5,
+      "avg_latency_ms": 828.2504558563232
+    },
+    {
+      "node_id": 1,
+      "cycles": 5,
+      "success": 5,
+      "avg_latency_ms": 1.5729427337646484
+    },
+    {
+      "node_id": 2,
+      "cycles": 5,
+      "success": 5,
+      "avg_latency_ms": 1.4029979705810547
+    },
+    {
+      "node_id": 3,
+      "cycles": 5,
+      "success": 5,
+      "avg_latency_ms": 0.9479045867919922
+    },
+    {
+      "node_id": 4,
+      "cycles": 5,
+      "success": 5,
+      "avg_latency_ms": 0.8960247039794922
+    },
+    {
+      "node_id": 5,
+      "cycles": 5,
+      "success": 5,
+      "avg_latency_ms": 0.06976127624511719
+    },
+    {
+      "node_id": 6,
+      "cycles": 5,
+      "success": 5,
+      "avg_latency_ms": 1.4101505279541016
+    },
+    {
+      "node_id": 7,
+      "cycles": 5,
+      "success": 5,
+      "avg_latency_ms": 0.6714820861816406
+    },
+    {
+      "node_id": 8,
+      "cycles": 5,
+      "success": 5,
+      "avg_latency_ms": 1.1669158935546875
+    },
+    {
+      "node_id": 9,
+      "cycles": 5,
+      "success": 5,
+      "avg_latency_ms": 1.1920928955078125
+    },
+    {
+      "node_id": 10,
+      "cycles": 5,
+      "success": 5,
+      "avg_latency_ms": 0.9831905364990234
+    },
+    {
+      "node_id": 11,
+      "cycles": 5,
+      "success": 5,
+      "avg_latency_ms": 1.1624336242675781
+    },
+    {
+      "node_id": 12,
+      "cycles": 5,
+      "success": 5,
+      "avg_latency_ms": 0.7053852081298828
+    },
+    {
+      "node_id": 13,
+      "cycles": 5,
+      "success": 5,
+      "avg_latency_ms": 1.3002395629882812
+    },
+    {
+      "node_id": 14,
+      "cycles": 5,
+      "success": 5,
+      "avg_latency_ms": 1.5110015869140625
+    },
+    {
+      "node_id": 15,
+      "cycles": 5,
+      "success": 5,
+      "avg_latency_ms": 0.6329536437988281
+    },
+    {
+      "node_id": 16,
+      "cycles": 5,
+      "success": 5,
+      "avg_latency_ms": 0.3997325897216797
+    },
+    {
+      "node_id": 17,
+      "cycles": 5,
+      "success": 5,
+      "avg_latency_ms": 0.9196281433105469
+    },
+    {
+      "node_id": 18,
+      "cycles": 5,
+      "success": 5,
+      "avg_latency_ms": 1.0769844055175781
+    },
+    {
+      "node_id": 19,
+      "cycles": 5,
+      "success": 5,
+      "avg_latency_ms": 0.20003318786621094
+    },
+    {
+      "node_id": 20,
+      "cycles": 5,
+      "success": 5,
+      "avg_latency_ms": 1.1973381042480469
+    },
+    {
+      "node_id": 21,
+      "cycles": 5,
+      "success": 5,
+      "avg_latency_ms": 1.0661602020263672
+    },
+    {
+      "node_id": 22,
+      "cycles": 5,
+      "success": 5,
+      "avg_latency_ms": 1.8242835998535156
+    },
+    {
+      "node_id": 23,
+      "cycles": 5,
+      "success": 5,
+      "avg_latency_ms": 0.7803440093994141
+    },
+    {
+      "node_id": 24,
+      "cycles": 5,
+      "success": 5,
+      "avg_latency_ms": 0.6461620330810547
+    },
+    {
+      "node_id": 25,
+      "cycles": 5,
+      "success": 5,
+      "avg_latency_ms": 1.0928630828857422
+    },
+    {
+      "node_id": 26,
+      "cycles": 5,
+      "success": 5,
+      "avg_latency_ms": 1.1051654815673828
+    },
+    {
+      "node_id": 27,
+      "cycles": 5,
+      "success": 5,
+      "avg_latency_ms": 1.0882854461669922
+    },
+    {
+      "node_id": 28,
+      "cycles": 5,
+      "success": 5,
+      "avg_latency_ms": 1.160430908203125
+    },
+    {
+      "node_id": 29,
+      "cycles": 5,
+      "success": 5,
+      "avg_latency_ms": 0.7985591888427734
+    },
+    {
+      "node_id": 30,
+      "cycles": 5,
+      "success": 5,
+      "avg_latency_ms": 0.93536376953125
+    },
+    {
+      "node_id": 31,
+      "cycles": 5,
+      "success": 5,
+      "avg_latency_ms": 0.5091667175292969
+    },
+    {
+      "node_id": 32,
+      "cycles": 5,
+      "success": 5,
+      "avg_latency_ms": 0.7440090179443359
+    },
+    {
+      "node_id": 33,
+      "cycles": 5,
+      "success": 5,
+      "avg_latency_ms": 1.3666629791259766
+    },
+    {
+      "node_id": 34,
+      "cycles": 5,
+      "success": 5,
+      "avg_latency_ms": 0.6623744964599609
+    },
+    {
+      "node_id": 35,
+      "cycles": 5,
+      "success": 5,
+      "avg_latency_ms": 1.2035369873046875
+    },
+    {
+      "node_id": 36,
+      "cycles": 5,
+      "success": 5,
+      "avg_latency_ms": 1.2865543365478516
+    },
+    {
+      "node_id": 37,
+      "cycles": 5,
+      "success": 5,
+      "avg_latency_ms": 1.3824939727783203
+    },
+    {
+      "node_id": 38,
+      "cycles": 5,
+      "success": 5,
+      "avg_latency_ms": 1.018381118774414
+    },
+    {
+      "node_id": 39,
+      "cycles": 5,
+      "success": 5,
+      "avg_latency_ms": 0.693511962890625
+    },
+    {
+      "node_id": 40,
+      "cycles": 5,
+      "success": 5,
+      "avg_latency_ms": 1.475381851196289
+    },
+    {
+      "node_id": 41,
+      "cycles": 5,
+      "success": 5,
+      "avg_latency_ms": 0.9021282196044922
+    },
+    {
+      "node_id": 42,
+      "cycles": 5,
+      "success": 5,
+      "avg_latency_ms": 1.3391971588134766
+    },
+    {
+      "node_id": 43,
+      "cycles": 5,
+      "success": 5,
+      "avg_latency_ms": 1.4758586883544922
+    },
+    {
+      "node_id": 44,
+      "cycles": 5,
+      "success": 5,
+      "avg_latency_ms": 0.7816314697265625
+    },
+    {
+      "node_id": 45,
+      "cycles": 5,
+      "success": 5,
+      "avg_latency_ms": 1.2991905212402344
+    },
+    {
+      "node_id": 46,
+      "cycles": 5,
+      "success": 5,
+      "avg_latency_ms": 0.9745121002197266
+    },
+    {
+      "node_id": 47,
+      "cycles": 5,
+      "success": 5,
+      "avg_latency_ms": 1.5333175659179688
+    },
+    {
+      "node_id": 48,
+      "cycles": 5,
+      "success": 5,
+      "avg_latency_ms": 1.1700630187988281
+    },
+    {
+      "node_id": 49,
+      "cycles": 5,
+      "success": 5,
+      "avg_latency_ms": 1.3321876525878906
+    }
+  ]
+}
