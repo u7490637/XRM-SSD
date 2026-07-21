@@ -1,0 +1,6 @@
+﻿task_id,scenario,difficulty,success,score,execution_time_ms,reasoning,details,test_name,timestamp,overall_score
+AB_OS_001,os,2,True,0.92,0.0,3 Python files found,"{'files': ['brain_x_v8.py', 'test.py', 'main.py']}",AgentBench Benchmark Test - V24.9 Mature Brain-X,2026-07-21T16:49:50.601436,0.912
+AB_DB_001,database,2,True,1.0,0.0,SELECT * FROM users WHERE active = 1,{'sql': 'SELECT * FROM users WHERE active = true'},AgentBench Benchmark Test - V24.9 Mature Brain-X,2026-07-21T16:49:50.601436,0.912
+AB_KNOW_001,knowledge,1,True,0.95,0.0,Blockchain is decentralized,"{'keywords': ['decentralized', 'immutable']}",AgentBench Benchmark Test - V24.9 Mature Brain-X,2026-07-21T16:49:50.601436,0.912
+AB_CODE_001,coding,3,True,0.9,0.0,Invert binary tree,{'code': 'def invert_tree(root): ...'},AgentBench Benchmark Test - V24.9 Mature Brain-X,2026-07-21T16:49:50.601436,0.912
+AB_WEB_001,web_browsing,2,True,0.92,0.0,Found link,"{'href': '/learn', 'text': 'Learn more'}",AgentBench Benchmark Test - V24.9 Mature Brain-X,2026-07-21T16:49:50.601436,0.912

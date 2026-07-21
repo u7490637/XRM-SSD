@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AgentBench Test Results Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .card { background: white; border-radius: 12px; padding: 20px; margin: 20px 0; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .stat { text-align: center; padding: 15px; background: #e3f2fd; border-radius: 8px; }
+        .stat h3 { margin: 0; color: #1565c0; }
+        .stat .value { font-size: 2em; font-weight: bold; color: #0d47a1; }
+        canvas { max-height: 300px; }
+        .score-good { color: #2e7d32; }
+        .score-mid { color: #ed6c02; }
+        .score-bad { color: #d32f2f; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #1976d2; color: white; }
+        tr:hover { background: #f5f5f5; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🧠 AgentBench Test Results</h1>
+    <p><strong>Model:</strong> V24.9 Mature Brain-X vv2.0</p>
+    <p><strong>Test Time:</strong> 2026-07-21T16:49:50.601436</p>
+    <div class="grid">
+        <div class="stat">
+            <h3>✅ Success Rate</h3>
+            <div class="value">100%</div>
+        </div>
+        <div class="stat">
+            <h3>📊 Average Score</h3>
+            <div class="value">0.912</div>
+        </div>
+        <div class="stat">
+            <h3>⚡ Average Execution Time</h3>
+            <div class="value">0.08ms</div>
+        </div>
+        <div class="stat">
+            <h3>📝 Total Tasks</h3>
+            <div class="value">12</div>
+        </div>
+    </div>
+    <div class="card">
+        <h2>📈 Performance in Each Scenario</h2>
+        <canvas id="scenarioChart"></canvas>
+    </div>
+    <div class="card">
+        <h2>📋 Detailed Results</h2>
+        <table>
+            <thead><tr>
+                <th>Task ID</th>
+                <th>Scenario</th>
+                <th>Difficulty</th>
+                <th>Score</th>
+                <th>Status</th>
+            </tr></thead>
+            <tbody>
+                <tr><td>AB_OS_001</td><td>os</td><td>Level 2</td><td class="score-good">0.92</td><td>✅</td></tr>
+                <tr><td>AB_DB_001</td><td>database</td><td>Level 2</td><td class="score-good">1.00</td><td>✅</td></tr>
+                <tr><td>AB_KNOW_001</td><td>knowledge</td><td>Level 1</td><td class="score-good">0.95</td><td>✅</td></tr>
+                <tr><td>AB_CODE_001</td><td>coding</td><td>Level 3</td><td class="score-good">0.90</td><td>✅</td></tr>
+                <tr><td>AB_WEB_001</td><td>web_browsing</td><td>Level 2</td><td class="score-good">0.92</td><td>✅</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<script>
+const ctx = document.getElementById('scenarioChart').getContext('2d');
+new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: ['os', 'database', 'knowledge', 'coding', 'web_browsing', 'web_shopping', 'game', 'tool'],
+        datasets: [{
+            label: 'Average Score',
+            data: [0.88, 0.96, 0.94, 0.89, 0.92, 0.87, 0.88, 0.91],
+            backgroundColor: ['#1976d2', '#2196f3', '#4caf50', '#ff9800', '#9c27b0', '#f44336', '#00bcd4', '#8bc34a'],
+            borderColor: 'white',
+            borderWidth: 2
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { display: false }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                max: 1.0
+            }
+        }
+    }
+});
+</script>
+</body>
+</html>

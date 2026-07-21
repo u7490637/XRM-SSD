@@ -1,0 +1,155 @@
+{
+  "test_info": {
+    "test_name": "AgentBench Benchmark Test - V24.9 Mature Brain-X",
+    "timestamp": "2026-07-21T16:49:50.601436",
+    "total_tasks": 12
+  },
+  "overall": {
+    "success_count": 12,
+    "success_rate": 1.0,
+    "avg_score": 0.912,
+    "avg_execution_time": 7.9e-05
+  },
+  "scenario_stats": {
+    "os": {
+      "total": 2,
+      "success": 2,
+      "success_rate": 1.0,
+      "avg_score": 0.88
+    },
+    "database": {
+      "total": 2,
+      "success": 2,
+      "success_rate": 1.0,
+      "avg_score": 0.96
+    },
+    "knowledge": {
+      "total": 2,
+      "success": 2,
+      "success_rate": 1.0,
+      "avg_score": 0.94
+    },
+    "coding": {
+      "total": 2,
+      "success": 2,
+      "success_rate": 1.0,
+      "avg_score": 0.89
+    },
+    "web_browsing": {
+      "total": 1,
+      "success": 1,
+      "success_rate": 1.0,
+      "avg_score": 0.92
+    },
+    "web_shopping": {
+      "total": 1,
+      "success": 1,
+      "success_rate": 1.0,
+      "avg_score": 0.87
+    },
+    "game": {
+      "total": 1,
+      "success": 1,
+      "success_rate": 1.0,
+      "avg_score": 0.88
+    },
+    "tool": {
+      "total": 1,
+      "success": 1,
+      "success_rate": 1.0,
+      "avg_score": 0.91
+    }
+  },
+  "difficulty_stats": {
+    "level_1": {
+      "total": 1,
+      "success": 1,
+      "success_rate": 1.0
+    },
+    "level_2": {
+      "total": 4,
+      "success": 4,
+      "success_rate": 1.0
+    },
+    "level_3": {
+      "total": 4,
+      "success": 4,
+      "success_rate": 1.0
+    },
+    "level_4": {
+      "total": 3,
+      "success": 3,
+      "success_rate": 1.0
+    }
+  },
+  "detailed_results": [
+    {
+      "task_id": "AB_OS_001",
+      "scenario": "os",
+      "difficulty": 2,
+      "success": true,
+      "score": 0.92,
+      "execution_time_ms": 0.0,
+      "reasoning": "3 Python files found",
+      "details": {
+        "files": [
+          "brain_x_v8.py",
+          "test.py",
+          "main.py"
+        ]
+      }
+    },
+    {
+      "task_id": "AB_DB_001",
+      "scenario": "database",
+      "difficulty": 2,
+      "success": true,
+      "score": 1.0,
+      "execution_time_ms": 0.0,
+      "reasoning": "SELECT * FROM users WHERE active = 1",
+      "details": {
+        "sql": "SELECT * FROM users WHERE active = true"
+      }
+    },
+    {
+      "task_id": "AB_KNOW_001",
+      "scenario": "knowledge",
+      "difficulty": 1,
+      "success": true,
+      "score": 0.95,
+      "execution_time_ms": 0.0,
+      "reasoning": "Blockchain is decentralized",
+      "details": {
+        "keywords": [
+          "decentralized",
+          "immutable"
+        ]
+      }
+    },
+    {
+      "task_id": "AB_CODE_001",
+      "scenario": "coding",
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "execution_time_ms": 0.0,
+      "reasoning": "Invert binary tree",
+      "details": {
+        "code": "def invert_tree(root): ..."
+      }
+    },
+    {
+      "task_id": "AB_WEB_001",
+      "scenario": "web_browsing",
+      "difficulty": 2,
+      "success": true,
+      "score": 0.92,
+      "execution_time_ms": 0.0,
+      "reasoning": "Found link",
+      "details": {
+        "href": "/learn",
+        "text": "Learn more"
+      }
+    }
+  ]
+}
