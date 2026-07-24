@@ -1,0 +1,4354 @@
+{
+  "test_info": {
+    "test_name": "τ²-bench AI 代理評測基準 - V24.9 Phase 123 物理版 (擴充版)",
+    "timestamp": "2026-07-24T13:49:17.451381",
+    "total_tasks": 52,
+    "total_iterations": 5,
+    "total_attempts": 260,
+    "total_agents": 4,
+    "platform": "Windows",
+    "duration_seconds": 7.600187301635742,
+    "config": {
+      "latency_min": 30,
+      "latency_max": 80,
+      "error_rate": 0.01,
+      "iterations": 5
+    }
+  },
+  "overall": {
+    "success_rate": 0.9961538461538462,
+    "avg_score": 0.8976923076923116,
+    "avg_collaboration_score": 0.12596153846153846,
+    "avg_resource_utilization": 0.0224981684981685,
+    "total_tool_calls": 131,
+    "pass@1": 1.0,
+    "pass@5": 1.0
+  },
+  "domain_stats": {
+    "airline": {
+      "total": 65,
+      "success": 65,
+      "success_rate": 1.0
+    },
+    "retail": {
+      "total": 95,
+      "success": 94,
+      "success_rate": 0.9894736842105263
+    },
+    "telecom": {
+      "total": 115,
+      "success": 115,
+      "success_rate": 1.0
+    },
+    "travel": {
+      "total": 10,
+      "success": 10,
+      "success_rate": 1.0
+    },
+    "banking": {
+      "total": 5,
+      "success": 5,
+      "success_rate": 1.0
+    }
+  },
+  "task_stats": {
+    "TEL_012": {
+      "success_rate": 1.0,
+      "avg_score": 0.9,
+      "attempts": 5,
+      "pass@1": 1.0,
+      "pass@5": 1.0
+    },
+    "AIR_004": {
+      "success_rate": 1.0,
+      "avg_score": 0.9,
+      "attempts": 5,
+      "pass@1": 1.0,
+      "pass@5": 1.0
+    },
+    "TEL_011": {
+      "success_rate": 1.0,
+      "avg_score": 0.9,
+      "attempts": 5,
+      "pass@1": 1.0,
+      "pass@5": 1.0
+    },
+    "AIR_007": {
+      "success_rate": 1.0,
+      "avg_score": 0.9,
+      "attempts": 5,
+      "pass@1": 1.0,
+      "pass@5": 1.0
+    },
+    "CD_005": {
+      "success_rate": 1.0,
+      "avg_score": 0.9,
+      "attempts": 5,
+      "pass@1": 1.0,
+      "pass@5": 1.0
+    },
+    "TEL_019": {
+      "success_rate": 1.0,
+      "avg_score": 0.9,
+      "attempts": 5,
+      "pass@1": 1.0,
+      "pass@5": 1.0
+    },
+    "AIR_002": {
+      "success_rate": 1.0,
+      "avg_score": 0.9,
+      "attempts": 5,
+      "pass@1": 1.0,
+      "pass@5": 1.0
+    },
+    "RET_012": {
+      "success_rate": 1.0,
+      "avg_score": 0.9,
+      "attempts": 5,
+      "pass@1": 1.0,
+      "pass@5": 1.0
+    },
+    "AIR_003": {
+      "success_rate": 1.0,
+      "avg_score": 0.9,
+      "attempts": 5,
+      "pass@1": 1.0,
+      "pass@5": 1.0
+    },
+    "RET_002": {
+      "success_rate": 1.0,
+      "avg_score": 0.9,
+      "attempts": 5,
+      "pass@1": 1.0,
+      "pass@5": 1.0
+    },
+    "TEL_013": {
+      "success_rate": 1.0,
+      "avg_score": 0.9,
+      "attempts": 5,
+      "pass@1": 1.0,
+      "pass@5": 1.0
+    },
+    "TEL_016": {
+      "success_rate": 1.0,
+      "avg_score": 0.9,
+      "attempts": 5,
+      "pass@1": 1.0,
+      "pass@5": 1.0
+    },
+    "TEL_001": {
+      "success_rate": 1.0,
+      "avg_score": 0.9,
+      "attempts": 5,
+      "pass@1": 1.0,
+      "pass@5": 1.0
+    },
+    "TEL_018": {
+      "success_rate": 1.0,
+      "avg_score": 0.9,
+      "attempts": 5,
+      "pass@1": 1.0,
+      "pass@5": 1.0
+    },
+    "AIR_001": {
+      "success_rate": 1.0,
+      "avg_score": 0.9,
+      "attempts": 5,
+      "pass@1": 1.0,
+      "pass@5": 1.0
+    },
+    "TEL_005": {
+      "success_rate": 1.0,
+      "avg_score": 0.9,
+      "attempts": 5,
+      "pass@1": 1.0,
+      "pass@5": 1.0
+    },
+    "AIR_009": {
+      "success_rate": 1.0,
+      "avg_score": 0.9,
+      "attempts": 5,
+      "pass@1": 1.0,
+      "pass@5": 1.0
+    },
+    "TEL_009": {
+      "success_rate": 1.0,
+      "avg_score": 0.9,
+      "attempts": 5,
+      "pass@1": 1.0,
+      "pass@5": 1.0
+    },
+    "AIR_006": {
+      "success_rate": 1.0,
+      "avg_score": 0.9,
+      "attempts": 5,
+      "pass@1": 1.0,
+      "pass@5": 1.0
+    },
+    "TEL_006": {
+      "success_rate": 1.0,
+      "avg_score": 0.9,
+      "attempts": 5,
+      "pass@1": 1.0,
+      "pass@5": 1.0
+    },
+    "TEL_004": {
+      "success_rate": 1.0,
+      "avg_score": 0.9,
+      "attempts": 5,
+      "pass@1": 1.0,
+      "pass@5": 1.0
+    },
+    "RET_004": {
+      "success_rate": 1.0,
+      "avg_score": 0.9,
+      "attempts": 5,
+      "pass@1": 1.0,
+      "pass@5": 1.0
+    },
+    "CD_002": {
+      "success_rate": 1.0,
+      "avg_score": 0.9,
+      "attempts": 5,
+      "pass@1": 1.0,
+      "pass@5": 1.0
+    },
+    "RET_015": {
+      "success_rate": 1.0,
+      "avg_score": 0.9,
+      "attempts": 5,
+      "pass@1": 1.0,
+      "pass@5": 1.0
+    },
+    "RET_005": {
+      "success_rate": 1.0,
+      "avg_score": 0.9,
+      "attempts": 5,
+      "pass@1": 1.0,
+      "pass@5": 1.0
+    },
+    "RET_008": {
+      "success_rate": 1.0,
+      "avg_score": 0.9,
+      "attempts": 5,
+      "pass@1": 1.0,
+      "pass@5": 1.0
+    },
+    "RET_001": {
+      "success_rate": 1.0,
+      "avg_score": 0.9,
+      "attempts": 5,
+      "pass@1": 1.0,
+      "pass@5": 1.0
+    },
+    "RET_013": {
+      "success_rate": 1.0,
+      "avg_score": 0.9,
+      "attempts": 5,
+      "pass@1": 1.0,
+      "pass@5": 1.0
+    },
+    "TEL_014": {
+      "success_rate": 1.0,
+      "avg_score": 0.9,
+      "attempts": 5,
+      "pass@1": 1.0,
+      "pass@5": 1.0
+    },
+    "RET_007": {
+      "success_rate": 1.0,
+      "avg_score": 0.9,
+      "attempts": 5,
+      "pass@1": 1.0,
+      "pass@5": 1.0
+    },
+    "TEL_008": {
+      "success_rate": 1.0,
+      "avg_score": 0.9,
+      "attempts": 5,
+      "pass@1": 1.0,
+      "pass@5": 1.0
+    },
+    "RET_014": {
+      "success_rate": 1.0,
+      "avg_score": 0.9,
+      "attempts": 5,
+      "pass@1": 1.0,
+      "pass@5": 1.0
+    },
+    "CD_004": {
+      "success_rate": 1.0,
+      "avg_score": 0.9,
+      "attempts": 5,
+      "pass@1": 1.0,
+      "pass@5": 1.0
+    },
+    "TEL_015": {
+      "success_rate": 1.0,
+      "avg_score": 0.9,
+      "attempts": 5,
+      "pass@1": 1.0,
+      "pass@5": 1.0
+    },
+    "RET_006": {
+      "success_rate": 1.0,
+      "avg_score": 0.9,
+      "attempts": 5,
+      "pass@1": 1.0,
+      "pass@5": 1.0
+    },
+    "TEL_010": {
+      "success_rate": 1.0,
+      "avg_score": 0.9,
+      "attempts": 5,
+      "pass@1": 1.0,
+      "pass@5": 1.0
+    },
+    "RET_011": {
+      "success_rate": 1.0,
+      "avg_score": 0.9,
+      "attempts": 5,
+      "pass@1": 1.0,
+      "pass@5": 1.0
+    },
+    "CD_001": {
+      "success_rate": 1.0,
+      "avg_score": 0.9,
+      "attempts": 5,
+      "pass@1": 1.0,
+      "pass@5": 1.0
+    },
+    "AIR_010": {
+      "success_rate": 1.0,
+      "avg_score": 0.9,
+      "attempts": 5,
+      "pass@1": 1.0,
+      "pass@5": 1.0
+    },
+    "RET_003": {
+      "success_rate": 0.8,
+      "avg_score": 0.78,
+      "attempts": 5,
+      "pass@1": 0.8,
+      "pass@5": 1.0
+    },
+    "RET_016": {
+      "success_rate": 1.0,
+      "avg_score": 0.9,
+      "attempts": 5,
+      "pass@1": 1.0,
+      "pass@5": 1.0
+    },
+    "TEL_002": {
+      "success_rate": 1.0,
+      "avg_score": 0.9,
+      "attempts": 5,
+      "pass@1": 1.0,
+      "pass@5": 1.0
+    },
+    "CD_003": {
+      "success_rate": 1.0,
+      "avg_score": 0.9,
+      "attempts": 5,
+      "pass@1": 1.0,
+      "pass@5": 1.0
+    },
+    "TEL_003": {
+      "success_rate": 1.0,
+      "avg_score": 0.9,
+      "attempts": 5,
+      "pass@1": 1.0,
+      "pass@5": 1.0
+    },
+    "TEL_021": {
+      "success_rate": 1.0,
+      "avg_score": 0.9,
+      "attempts": 5,
+      "pass@1": 1.0,
+      "pass@5": 1.0
+    },
+    "TEL_017": {
+      "success_rate": 1.0,
+      "avg_score": 0.9,
+      "attempts": 5,
+      "pass@1": 1.0,
+      "pass@5": 1.0
+    },
+    "RET_010": {
+      "success_rate": 1.0,
+      "avg_score": 0.9,
+      "attempts": 5,
+      "pass@1": 1.0,
+      "pass@5": 1.0
+    },
+    "TEL_007": {
+      "success_rate": 1.0,
+      "avg_score": 0.9,
+      "attempts": 5,
+      "pass@1": 1.0,
+      "pass@5": 1.0
+    },
+    "AIR_005": {
+      "success_rate": 1.0,
+      "avg_score": 0.9,
+      "attempts": 5,
+      "pass@1": 1.0,
+      "pass@5": 1.0
+    },
+    "TEL_020": {
+      "success_rate": 1.0,
+      "avg_score": 0.9,
+      "attempts": 5,
+      "pass@1": 1.0,
+      "pass@5": 1.0
+    },
+    "AIR_008": {
+      "success_rate": 1.0,
+      "avg_score": 0.9,
+      "attempts": 5,
+      "pass@1": 1.0,
+      "pass@5": 1.0
+    },
+    "RET_009": {
+      "success_rate": 1.0,
+      "avg_score": 0.9,
+      "attempts": 5,
+      "pass@1": 1.0,
+      "pass@5": 1.0
+    }
+  },
+  "detailed_results": [
+    {
+      "task_id": "AIR_001",
+      "domains": [
+        "airline"
+      ],
+      "difficulty": 1,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.06666666666666667,
+      "execution_time": 0.06804656982421875,
+      "errors": [],
+      "iteration": 0
+    },
+    {
+      "task_id": "AIR_002",
+      "domains": [
+        "airline"
+      ],
+      "difficulty": 1,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.05,
+      "execution_time": 0.03928709030151367,
+      "errors": [],
+      "iteration": 0
+    },
+    {
+      "task_id": "AIR_003",
+      "domains": [
+        "airline"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.04,
+      "execution_time": 0.03604459762573242,
+      "errors": [],
+      "iteration": 0
+    },
+    {
+      "task_id": "AIR_004",
+      "domains": [
+        "airline"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.05,
+      "execution_time": 0.06436300277709961,
+      "errors": [],
+      "iteration": 0
+    },
+    {
+      "task_id": "AIR_005",
+      "domains": [
+        "airline"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 0
+    },
+    {
+      "task_id": "AIR_006",
+      "domains": [
+        "airline"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 0
+    },
+    {
+      "task_id": "AIR_007",
+      "domains": [
+        "airline"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 2,
+      "collaboration_score": 0.5,
+      "resource_utilization": 0.08,
+      "execution_time": 0.13086223602294922,
+      "errors": [],
+      "iteration": 0
+    },
+    {
+      "task_id": "AIR_008",
+      "domains": [
+        "airline"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 2,
+      "collaboration_score": 0.5,
+      "resource_utilization": 0.1,
+      "execution_time": 0.08508968353271484,
+      "errors": [],
+      "iteration": 0
+    },
+    {
+      "task_id": "AIR_009",
+      "domains": [
+        "airline"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.04,
+      "execution_time": 0.0812537670135498,
+      "errors": [],
+      "iteration": 0
+    },
+    {
+      "task_id": "AIR_010",
+      "domains": [
+        "airline"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 2,
+      "collaboration_score": 0.5,
+      "resource_utilization": 0.08,
+      "execution_time": 0.11831521987915039,
+      "errors": [],
+      "iteration": 0
+    },
+    {
+      "task_id": "RET_001",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 1,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 0
+    },
+    {
+      "task_id": "RET_002",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 1,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 0
+    },
+    {
+      "task_id": "RET_003",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 2,
+      "success": false,
+      "score": 0.3,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.04,
+      "execution_time": 0.07829093933105469,
+      "errors": [
+        "Planner Alpha 失敗: compare_products 失敗: Service Unavailable"
+      ],
+      "iteration": 0
+    },
+    {
+      "task_id": "RET_004",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 0
+    },
+    {
+      "task_id": "RET_005",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.02857142857142857,
+      "execution_time": 0.054430484771728516,
+      "errors": [],
+      "iteration": 0
+    },
+    {
+      "task_id": "RET_006",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.06666666666666667,
+      "execution_time": 0.07773780822753906,
+      "errors": [],
+      "iteration": 0
+    },
+    {
+      "task_id": "RET_007",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 2,
+      "collaboration_score": 0.5,
+      "resource_utilization": 0.08,
+      "execution_time": 0.06790781021118164,
+      "errors": [],
+      "iteration": 0
+    },
+    {
+      "task_id": "RET_008",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 2,
+      "collaboration_score": 0.5,
+      "resource_utilization": 0.08,
+      "execution_time": 0.11769938468933105,
+      "errors": [],
+      "iteration": 0
+    },
+    {
+      "task_id": "RET_009",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 2,
+      "collaboration_score": 0.5,
+      "resource_utilization": 0.08,
+      "execution_time": 0.12151217460632324,
+      "errors": [],
+      "iteration": 0
+    },
+    {
+      "task_id": "RET_010",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.04,
+      "execution_time": 0.04360842704772949,
+      "errors": [],
+      "iteration": 0
+    },
+    {
+      "task_id": "RET_011",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.04,
+      "execution_time": 0.04452395439147949,
+      "errors": [],
+      "iteration": 0
+    },
+    {
+      "task_id": "RET_012",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 0
+    },
+    {
+      "task_id": "RET_013",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 0
+    },
+    {
+      "task_id": "RET_014",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.06666666666666667,
+      "execution_time": 0.05864214897155762,
+      "errors": [],
+      "iteration": 0
+    },
+    {
+      "task_id": "RET_015",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 0
+    },
+    {
+      "task_id": "RET_016",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 2,
+      "collaboration_score": 0.5,
+      "resource_utilization": 0.1,
+      "execution_time": 0.0864405632019043,
+      "errors": [],
+      "iteration": 0
+    },
+    {
+      "task_id": "TEL_001",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 1,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 0
+    },
+    {
+      "task_id": "TEL_002",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 0
+    },
+    {
+      "task_id": "TEL_003",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 0
+    },
+    {
+      "task_id": "TEL_004",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.03333333333333333,
+      "execution_time": 0.0742192268371582,
+      "errors": [],
+      "iteration": 0
+    },
+    {
+      "task_id": "TEL_005",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.04,
+      "execution_time": 0.07153034210205078,
+      "errors": [],
+      "iteration": 0
+    },
+    {
+      "task_id": "TEL_006",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 0
+    },
+    {
+      "task_id": "TEL_007",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 0
+    },
+    {
+      "task_id": "TEL_008",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 0
+    },
+    {
+      "task_id": "TEL_009",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 0
+    },
+    {
+      "task_id": "TEL_010",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 5,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 0
+    },
+    {
+      "task_id": "TEL_011",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 0
+    },
+    {
+      "task_id": "TEL_012",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 0
+    },
+    {
+      "task_id": "TEL_013",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 0
+    },
+    {
+      "task_id": "TEL_014",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 0
+    },
+    {
+      "task_id": "TEL_015",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 0
+    },
+    {
+      "task_id": "TEL_016",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 0
+    },
+    {
+      "task_id": "TEL_017",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 0
+    },
+    {
+      "task_id": "TEL_018",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 0
+    },
+    {
+      "task_id": "TEL_019",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 0
+    },
+    {
+      "task_id": "TEL_020",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 0
+    },
+    {
+      "task_id": "TEL_021",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 0
+    },
+    {
+      "task_id": "CD_001",
+      "domains": [
+        "airline",
+        "travel"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 0
+    },
+    {
+      "task_id": "CD_002",
+      "domains": [
+        "retail",
+        "banking"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 0
+    },
+    {
+      "task_id": "CD_003",
+      "domains": [
+        "telecom",
+        "travel"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 0
+    },
+    {
+      "task_id": "CD_004",
+      "domains": [
+        "airline",
+        "retail"
+      ],
+      "difficulty": 5,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 0
+    },
+    {
+      "task_id": "CD_005",
+      "domains": [
+        "airline",
+        "telecom",
+        "retail"
+      ],
+      "difficulty": 5,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 0
+    },
+    {
+      "task_id": "AIR_001",
+      "domains": [
+        "airline"
+      ],
+      "difficulty": 1,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.06666666666666667,
+      "execution_time": 0.03725719451904297,
+      "errors": [],
+      "iteration": 1
+    },
+    {
+      "task_id": "AIR_002",
+      "domains": [
+        "airline"
+      ],
+      "difficulty": 1,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.05,
+      "execution_time": 0.07213616371154785,
+      "errors": [],
+      "iteration": 1
+    },
+    {
+      "task_id": "AIR_003",
+      "domains": [
+        "airline"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.04,
+      "execution_time": 0.07890629768371582,
+      "errors": [],
+      "iteration": 1
+    },
+    {
+      "task_id": "AIR_004",
+      "domains": [
+        "airline"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.05,
+      "execution_time": 0.0333251953125,
+      "errors": [],
+      "iteration": 1
+    },
+    {
+      "task_id": "AIR_005",
+      "domains": [
+        "airline"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 1
+    },
+    {
+      "task_id": "AIR_006",
+      "domains": [
+        "airline"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 1
+    },
+    {
+      "task_id": "AIR_007",
+      "domains": [
+        "airline"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 2,
+      "collaboration_score": 0.5,
+      "resource_utilization": 0.08,
+      "execution_time": 0.11043190956115723,
+      "errors": [],
+      "iteration": 1
+    },
+    {
+      "task_id": "AIR_008",
+      "domains": [
+        "airline"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 2,
+      "collaboration_score": 0.5,
+      "resource_utilization": 0.1,
+      "execution_time": 0.13563275337219238,
+      "errors": [],
+      "iteration": 1
+    },
+    {
+      "task_id": "AIR_009",
+      "domains": [
+        "airline"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.04,
+      "execution_time": 0.07049703598022461,
+      "errors": [],
+      "iteration": 1
+    },
+    {
+      "task_id": "AIR_010",
+      "domains": [
+        "airline"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 2,
+      "collaboration_score": 0.5,
+      "resource_utilization": 0.08,
+      "execution_time": 0.10560870170593262,
+      "errors": [],
+      "iteration": 1
+    },
+    {
+      "task_id": "RET_001",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 1,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 1
+    },
+    {
+      "task_id": "RET_002",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 1,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 1
+    },
+    {
+      "task_id": "RET_003",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.04,
+      "execution_time": 0.07265830039978027,
+      "errors": [],
+      "iteration": 1
+    },
+    {
+      "task_id": "RET_004",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 1
+    },
+    {
+      "task_id": "RET_005",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.02857142857142857,
+      "execution_time": 0.06385922431945801,
+      "errors": [],
+      "iteration": 1
+    },
+    {
+      "task_id": "RET_006",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.06666666666666667,
+      "execution_time": 0.06959033012390137,
+      "errors": [],
+      "iteration": 1
+    },
+    {
+      "task_id": "RET_007",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 2,
+      "collaboration_score": 0.5,
+      "resource_utilization": 0.08,
+      "execution_time": 0.07152962684631348,
+      "errors": [],
+      "iteration": 1
+    },
+    {
+      "task_id": "RET_008",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 2,
+      "collaboration_score": 0.5,
+      "resource_utilization": 0.08,
+      "execution_time": 0.11506223678588867,
+      "errors": [],
+      "iteration": 1
+    },
+    {
+      "task_id": "RET_009",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 2,
+      "collaboration_score": 0.5,
+      "resource_utilization": 0.08,
+      "execution_time": 0.13614416122436523,
+      "errors": [],
+      "iteration": 1
+    },
+    {
+      "task_id": "RET_010",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.04,
+      "execution_time": 0.04801225662231445,
+      "errors": [],
+      "iteration": 1
+    },
+    {
+      "task_id": "RET_011",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 1
+    },
+    {
+      "task_id": "RET_012",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 1
+    },
+    {
+      "task_id": "RET_013",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 1
+    },
+    {
+      "task_id": "RET_014",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.06666666666666667,
+      "execution_time": 0.03457236289978027,
+      "errors": [],
+      "iteration": 1
+    },
+    {
+      "task_id": "RET_015",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 1
+    },
+    {
+      "task_id": "RET_016",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 2,
+      "collaboration_score": 0.5,
+      "resource_utilization": 0.1,
+      "execution_time": 0.12121891975402832,
+      "errors": [],
+      "iteration": 1
+    },
+    {
+      "task_id": "TEL_001",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 1,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 1
+    },
+    {
+      "task_id": "TEL_002",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 1
+    },
+    {
+      "task_id": "TEL_003",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 1
+    },
+    {
+      "task_id": "TEL_004",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.03333333333333333,
+      "execution_time": 0.050469160079956055,
+      "errors": [],
+      "iteration": 1
+    },
+    {
+      "task_id": "TEL_005",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.04,
+      "execution_time": 0.04855847358703613,
+      "errors": [],
+      "iteration": 1
+    },
+    {
+      "task_id": "TEL_006",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0010180473327636719,
+      "errors": [],
+      "iteration": 1
+    },
+    {
+      "task_id": "TEL_007",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 1
+    },
+    {
+      "task_id": "TEL_008",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 1
+    },
+    {
+      "task_id": "TEL_009",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 1
+    },
+    {
+      "task_id": "TEL_010",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 5,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 1
+    },
+    {
+      "task_id": "TEL_011",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 1
+    },
+    {
+      "task_id": "TEL_012",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 1
+    },
+    {
+      "task_id": "TEL_013",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 1
+    },
+    {
+      "task_id": "TEL_014",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 1
+    },
+    {
+      "task_id": "TEL_015",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 1
+    },
+    {
+      "task_id": "TEL_016",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 1
+    },
+    {
+      "task_id": "TEL_017",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 1
+    },
+    {
+      "task_id": "TEL_018",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 1
+    },
+    {
+      "task_id": "TEL_019",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 1
+    },
+    {
+      "task_id": "TEL_020",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 1
+    },
+    {
+      "task_id": "TEL_021",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 1
+    },
+    {
+      "task_id": "CD_001",
+      "domains": [
+        "airline",
+        "travel"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 1
+    },
+    {
+      "task_id": "CD_002",
+      "domains": [
+        "retail",
+        "banking"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 8.058547973632812e-05,
+      "errors": [],
+      "iteration": 1
+    },
+    {
+      "task_id": "CD_003",
+      "domains": [
+        "telecom",
+        "travel"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 1
+    },
+    {
+      "task_id": "CD_004",
+      "domains": [
+        "airline",
+        "retail"
+      ],
+      "difficulty": 5,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 1
+    },
+    {
+      "task_id": "CD_005",
+      "domains": [
+        "airline",
+        "telecom",
+        "retail"
+      ],
+      "difficulty": 5,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 1
+    },
+    {
+      "task_id": "AIR_001",
+      "domains": [
+        "airline"
+      ],
+      "difficulty": 1,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.06666666666666667,
+      "execution_time": 0.031847238540649414,
+      "errors": [],
+      "iteration": 2
+    },
+    {
+      "task_id": "AIR_002",
+      "domains": [
+        "airline"
+      ],
+      "difficulty": 1,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.05,
+      "execution_time": 0.06984281539916992,
+      "errors": [],
+      "iteration": 2
+    },
+    {
+      "task_id": "AIR_003",
+      "domains": [
+        "airline"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.04,
+      "execution_time": 0.05093216896057129,
+      "errors": [],
+      "iteration": 2
+    },
+    {
+      "task_id": "AIR_004",
+      "domains": [
+        "airline"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.05,
+      "execution_time": 0.05956077575683594,
+      "errors": [],
+      "iteration": 2
+    },
+    {
+      "task_id": "AIR_005",
+      "domains": [
+        "airline"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 2
+    },
+    {
+      "task_id": "AIR_006",
+      "domains": [
+        "airline"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 2
+    },
+    {
+      "task_id": "AIR_007",
+      "domains": [
+        "airline"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 2,
+      "collaboration_score": 0.5,
+      "resource_utilization": 0.08,
+      "execution_time": 0.1219785213470459,
+      "errors": [],
+      "iteration": 2
+    },
+    {
+      "task_id": "AIR_008",
+      "domains": [
+        "airline"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 2,
+      "collaboration_score": 0.5,
+      "resource_utilization": 0.1,
+      "execution_time": 0.13608622550964355,
+      "errors": [],
+      "iteration": 2
+    },
+    {
+      "task_id": "AIR_009",
+      "domains": [
+        "airline"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.04,
+      "execution_time": 0.06569123268127441,
+      "errors": [],
+      "iteration": 2
+    },
+    {
+      "task_id": "AIR_010",
+      "domains": [
+        "airline"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 2,
+      "collaboration_score": 0.5,
+      "resource_utilization": 0.08,
+      "execution_time": 0.1205902099609375,
+      "errors": [],
+      "iteration": 2
+    },
+    {
+      "task_id": "RET_001",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 1,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 2
+    },
+    {
+      "task_id": "RET_002",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 1,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 2
+    },
+    {
+      "task_id": "RET_003",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.04,
+      "execution_time": 0.04342484474182129,
+      "errors": [],
+      "iteration": 2
+    },
+    {
+      "task_id": "RET_004",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 2
+    },
+    {
+      "task_id": "RET_005",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.02857142857142857,
+      "execution_time": 0.042260169982910156,
+      "errors": [],
+      "iteration": 2
+    },
+    {
+      "task_id": "RET_006",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.06666666666666667,
+      "execution_time": 0.03264784812927246,
+      "errors": [],
+      "iteration": 2
+    },
+    {
+      "task_id": "RET_007",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 2,
+      "collaboration_score": 0.5,
+      "resource_utilization": 0.08,
+      "execution_time": 0.13366246223449707,
+      "errors": [],
+      "iteration": 2
+    },
+    {
+      "task_id": "RET_008",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 2,
+      "collaboration_score": 0.5,
+      "resource_utilization": 0.08,
+      "execution_time": 0.11693215370178223,
+      "errors": [],
+      "iteration": 2
+    },
+    {
+      "task_id": "RET_009",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 2,
+      "collaboration_score": 0.5,
+      "resource_utilization": 0.08,
+      "execution_time": 0.09410715103149414,
+      "errors": [],
+      "iteration": 2
+    },
+    {
+      "task_id": "RET_010",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.04,
+      "execution_time": 0.04615926742553711,
+      "errors": [],
+      "iteration": 2
+    },
+    {
+      "task_id": "RET_011",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 2
+    },
+    {
+      "task_id": "RET_012",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 2
+    },
+    {
+      "task_id": "RET_013",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 2
+    },
+    {
+      "task_id": "RET_014",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.06666666666666667,
+      "execution_time": 0.08022332191467285,
+      "errors": [],
+      "iteration": 2
+    },
+    {
+      "task_id": "RET_015",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 2
+    },
+    {
+      "task_id": "RET_016",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 2,
+      "collaboration_score": 0.5,
+      "resource_utilization": 0.1,
+      "execution_time": 0.12964844703674316,
+      "errors": [],
+      "iteration": 2
+    },
+    {
+      "task_id": "TEL_001",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 1,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 2
+    },
+    {
+      "task_id": "TEL_002",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 2
+    },
+    {
+      "task_id": "TEL_003",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 2
+    },
+    {
+      "task_id": "TEL_004",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.03333333333333333,
+      "execution_time": 0.03620171546936035,
+      "errors": [],
+      "iteration": 2
+    },
+    {
+      "task_id": "TEL_005",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.04,
+      "execution_time": 0.04859352111816406,
+      "errors": [],
+      "iteration": 2
+    },
+    {
+      "task_id": "TEL_006",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 2
+    },
+    {
+      "task_id": "TEL_007",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 2
+    },
+    {
+      "task_id": "TEL_008",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 2
+    },
+    {
+      "task_id": "TEL_009",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 2
+    },
+    {
+      "task_id": "TEL_010",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 5,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 2
+    },
+    {
+      "task_id": "TEL_011",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 2
+    },
+    {
+      "task_id": "TEL_012",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 2
+    },
+    {
+      "task_id": "TEL_013",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0004410743713378906,
+      "errors": [],
+      "iteration": 2
+    },
+    {
+      "task_id": "TEL_014",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 2
+    },
+    {
+      "task_id": "TEL_015",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 2
+    },
+    {
+      "task_id": "TEL_016",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 2
+    },
+    {
+      "task_id": "TEL_017",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 2
+    },
+    {
+      "task_id": "TEL_018",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 2
+    },
+    {
+      "task_id": "TEL_019",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 2
+    },
+    {
+      "task_id": "TEL_020",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 2
+    },
+    {
+      "task_id": "TEL_021",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 2
+    },
+    {
+      "task_id": "CD_001",
+      "domains": [
+        "airline",
+        "travel"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 2
+    },
+    {
+      "task_id": "CD_002",
+      "domains": [
+        "retail",
+        "banking"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 2
+    },
+    {
+      "task_id": "CD_003",
+      "domains": [
+        "telecom",
+        "travel"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 2
+    },
+    {
+      "task_id": "CD_004",
+      "domains": [
+        "airline",
+        "retail"
+      ],
+      "difficulty": 5,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 2
+    },
+    {
+      "task_id": "CD_005",
+      "domains": [
+        "airline",
+        "telecom",
+        "retail"
+      ],
+      "difficulty": 5,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.000997304916381836,
+      "errors": [],
+      "iteration": 2
+    },
+    {
+      "task_id": "AIR_001",
+      "domains": [
+        "airline"
+      ],
+      "difficulty": 1,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.06666666666666667,
+      "execution_time": 0.03932309150695801,
+      "errors": [],
+      "iteration": 3
+    },
+    {
+      "task_id": "AIR_002",
+      "domains": [
+        "airline"
+      ],
+      "difficulty": 1,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.05,
+      "execution_time": 0.045000314712524414,
+      "errors": [],
+      "iteration": 3
+    },
+    {
+      "task_id": "AIR_003",
+      "domains": [
+        "airline"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.04,
+      "execution_time": 0.05154776573181152,
+      "errors": [],
+      "iteration": 3
+    },
+    {
+      "task_id": "AIR_004",
+      "domains": [
+        "airline"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.05,
+      "execution_time": 0.049677133560180664,
+      "errors": [],
+      "iteration": 3
+    },
+    {
+      "task_id": "AIR_005",
+      "domains": [
+        "airline"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 3
+    },
+    {
+      "task_id": "AIR_006",
+      "domains": [
+        "airline"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 3
+    },
+    {
+      "task_id": "AIR_007",
+      "domains": [
+        "airline"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 2,
+      "collaboration_score": 0.5,
+      "resource_utilization": 0.08,
+      "execution_time": 0.06499934196472168,
+      "errors": [],
+      "iteration": 3
+    },
+    {
+      "task_id": "AIR_008",
+      "domains": [
+        "airline"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 2,
+      "collaboration_score": 0.5,
+      "resource_utilization": 0.1,
+      "execution_time": 0.10516762733459473,
+      "errors": [],
+      "iteration": 3
+    },
+    {
+      "task_id": "AIR_009",
+      "domains": [
+        "airline"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.04,
+      "execution_time": 0.06364130973815918,
+      "errors": [],
+      "iteration": 3
+    },
+    {
+      "task_id": "AIR_010",
+      "domains": [
+        "airline"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 2,
+      "collaboration_score": 0.5,
+      "resource_utilization": 0.08,
+      "execution_time": 0.10564374923706055,
+      "errors": [],
+      "iteration": 3
+    },
+    {
+      "task_id": "RET_001",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 1,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 3
+    },
+    {
+      "task_id": "RET_002",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 1,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 3
+    },
+    {
+      "task_id": "RET_003",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.04,
+      "execution_time": 0.07074117660522461,
+      "errors": [],
+      "iteration": 3
+    },
+    {
+      "task_id": "RET_004",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 3
+    },
+    {
+      "task_id": "RET_005",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.02857142857142857,
+      "execution_time": 0.07108855247497559,
+      "errors": [],
+      "iteration": 3
+    },
+    {
+      "task_id": "RET_006",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.06666666666666667,
+      "execution_time": 0.044426679611206055,
+      "errors": [],
+      "iteration": 3
+    },
+    {
+      "task_id": "RET_007",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 2,
+      "collaboration_score": 0.5,
+      "resource_utilization": 0.08,
+      "execution_time": 0.11836624145507812,
+      "errors": [],
+      "iteration": 3
+    },
+    {
+      "task_id": "RET_008",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 2,
+      "collaboration_score": 0.5,
+      "resource_utilization": 0.08,
+      "execution_time": 0.08926868438720703,
+      "errors": [],
+      "iteration": 3
+    },
+    {
+      "task_id": "RET_009",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 2,
+      "collaboration_score": 0.5,
+      "resource_utilization": 0.08,
+      "execution_time": 0.10058927536010742,
+      "errors": [],
+      "iteration": 3
+    },
+    {
+      "task_id": "RET_010",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.04,
+      "execution_time": 0.05080437660217285,
+      "errors": [],
+      "iteration": 3
+    },
+    {
+      "task_id": "RET_011",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 3
+    },
+    {
+      "task_id": "RET_012",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 3
+    },
+    {
+      "task_id": "RET_013",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 3
+    },
+    {
+      "task_id": "RET_014",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.06666666666666667,
+      "execution_time": 0.07755827903747559,
+      "errors": [],
+      "iteration": 3
+    },
+    {
+      "task_id": "RET_015",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 3
+    },
+    {
+      "task_id": "RET_016",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 2,
+      "collaboration_score": 0.5,
+      "resource_utilization": 0.1,
+      "execution_time": 0.11037373542785645,
+      "errors": [],
+      "iteration": 3
+    },
+    {
+      "task_id": "TEL_001",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 1,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 3
+    },
+    {
+      "task_id": "TEL_002",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 3
+    },
+    {
+      "task_id": "TEL_003",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 3
+    },
+    {
+      "task_id": "TEL_004",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.03333333333333333,
+      "execution_time": 0.05164313316345215,
+      "errors": [],
+      "iteration": 3
+    },
+    {
+      "task_id": "TEL_005",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.04,
+      "execution_time": 0.034418582916259766,
+      "errors": [],
+      "iteration": 3
+    },
+    {
+      "task_id": "TEL_006",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 3
+    },
+    {
+      "task_id": "TEL_007",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 3
+    },
+    {
+      "task_id": "TEL_008",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 3
+    },
+    {
+      "task_id": "TEL_009",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 3
+    },
+    {
+      "task_id": "TEL_010",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 5,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 3
+    },
+    {
+      "task_id": "TEL_011",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0010001659393310547,
+      "errors": [],
+      "iteration": 3
+    },
+    {
+      "task_id": "TEL_012",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 3
+    },
+    {
+      "task_id": "TEL_013",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 3
+    },
+    {
+      "task_id": "TEL_014",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 3
+    },
+    {
+      "task_id": "TEL_015",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 3
+    },
+    {
+      "task_id": "TEL_016",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 3
+    },
+    {
+      "task_id": "TEL_017",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 3
+    },
+    {
+      "task_id": "TEL_018",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 3
+    },
+    {
+      "task_id": "TEL_019",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 3
+    },
+    {
+      "task_id": "TEL_020",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 3
+    },
+    {
+      "task_id": "TEL_021",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 3
+    },
+    {
+      "task_id": "CD_001",
+      "domains": [
+        "airline",
+        "travel"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 3
+    },
+    {
+      "task_id": "CD_002",
+      "domains": [
+        "retail",
+        "banking"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 3
+    },
+    {
+      "task_id": "CD_003",
+      "domains": [
+        "telecom",
+        "travel"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 3
+    },
+    {
+      "task_id": "CD_004",
+      "domains": [
+        "airline",
+        "retail"
+      ],
+      "difficulty": 5,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 3
+    },
+    {
+      "task_id": "CD_005",
+      "domains": [
+        "airline",
+        "telecom",
+        "retail"
+      ],
+      "difficulty": 5,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 3
+    },
+    {
+      "task_id": "AIR_001",
+      "domains": [
+        "airline"
+      ],
+      "difficulty": 1,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.06666666666666667,
+      "execution_time": 0.0495913028717041,
+      "errors": [],
+      "iteration": 4
+    },
+    {
+      "task_id": "AIR_002",
+      "domains": [
+        "airline"
+      ],
+      "difficulty": 1,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.05,
+      "execution_time": 0.050397396087646484,
+      "errors": [],
+      "iteration": 4
+    },
+    {
+      "task_id": "AIR_003",
+      "domains": [
+        "airline"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.04,
+      "execution_time": 0.08100247383117676,
+      "errors": [],
+      "iteration": 4
+    },
+    {
+      "task_id": "AIR_004",
+      "domains": [
+        "airline"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.05,
+      "execution_time": 0.07467269897460938,
+      "errors": [],
+      "iteration": 4
+    },
+    {
+      "task_id": "AIR_005",
+      "domains": [
+        "airline"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 4
+    },
+    {
+      "task_id": "AIR_006",
+      "domains": [
+        "airline"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 4
+    },
+    {
+      "task_id": "AIR_007",
+      "domains": [
+        "airline"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 2,
+      "collaboration_score": 0.5,
+      "resource_utilization": 0.08,
+      "execution_time": 0.09114670753479004,
+      "errors": [],
+      "iteration": 4
+    },
+    {
+      "task_id": "AIR_008",
+      "domains": [
+        "airline"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 2,
+      "collaboration_score": 0.5,
+      "resource_utilization": 0.1,
+      "execution_time": 0.11037659645080566,
+      "errors": [],
+      "iteration": 4
+    },
+    {
+      "task_id": "AIR_009",
+      "domains": [
+        "airline"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.04,
+      "execution_time": 0.07289910316467285,
+      "errors": [],
+      "iteration": 4
+    },
+    {
+      "task_id": "AIR_010",
+      "domains": [
+        "airline"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 2,
+      "collaboration_score": 0.5,
+      "resource_utilization": 0.08,
+      "execution_time": 0.11174821853637695,
+      "errors": [],
+      "iteration": 4
+    },
+    {
+      "task_id": "RET_001",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 1,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 4
+    },
+    {
+      "task_id": "RET_002",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 1,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 4
+    },
+    {
+      "task_id": "RET_003",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.04,
+      "execution_time": 0.07037734985351562,
+      "errors": [],
+      "iteration": 4
+    },
+    {
+      "task_id": "RET_004",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 4
+    },
+    {
+      "task_id": "RET_005",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.02857142857142857,
+      "execution_time": 0.05262184143066406,
+      "errors": [],
+      "iteration": 4
+    },
+    {
+      "task_id": "RET_006",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.06666666666666667,
+      "execution_time": 0.04754209518432617,
+      "errors": [],
+      "iteration": 4
+    },
+    {
+      "task_id": "RET_007",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 2,
+      "collaboration_score": 0.5,
+      "resource_utilization": 0.08,
+      "execution_time": 0.12149572372436523,
+      "errors": [],
+      "iteration": 4
+    },
+    {
+      "task_id": "RET_008",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 2,
+      "collaboration_score": 0.5,
+      "resource_utilization": 0.08,
+      "execution_time": 0.1364271640777588,
+      "errors": [],
+      "iteration": 4
+    },
+    {
+      "task_id": "RET_009",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 2,
+      "collaboration_score": 0.5,
+      "resource_utilization": 0.08,
+      "execution_time": 0.0936136245727539,
+      "errors": [],
+      "iteration": 4
+    },
+    {
+      "task_id": "RET_010",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.04,
+      "execution_time": 0.04893612861633301,
+      "errors": [],
+      "iteration": 4
+    },
+    {
+      "task_id": "RET_011",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 4
+    },
+    {
+      "task_id": "RET_012",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 4
+    },
+    {
+      "task_id": "RET_013",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 4
+    },
+    {
+      "task_id": "RET_014",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.06666666666666667,
+      "execution_time": 0.05143404006958008,
+      "errors": [],
+      "iteration": 4
+    },
+    {
+      "task_id": "RET_015",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 4
+    },
+    {
+      "task_id": "RET_016",
+      "domains": [
+        "retail"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 2,
+      "collaboration_score": 0.5,
+      "resource_utilization": 0.1,
+      "execution_time": 0.09496402740478516,
+      "errors": [],
+      "iteration": 4
+    },
+    {
+      "task_id": "TEL_001",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 1,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 4
+    },
+    {
+      "task_id": "TEL_002",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 4
+    },
+    {
+      "task_id": "TEL_003",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 4
+    },
+    {
+      "task_id": "TEL_004",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.03333333333333333,
+      "execution_time": 0.0418245792388916,
+      "errors": [],
+      "iteration": 4
+    },
+    {
+      "task_id": "TEL_005",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 1,
+      "collaboration_score": 0.25,
+      "resource_utilization": 0.04,
+      "execution_time": 0.0770726203918457,
+      "errors": [],
+      "iteration": 4
+    },
+    {
+      "task_id": "TEL_006",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 4
+    },
+    {
+      "task_id": "TEL_007",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 4
+    },
+    {
+      "task_id": "TEL_008",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0009565353393554688,
+      "errors": [],
+      "iteration": 4
+    },
+    {
+      "task_id": "TEL_009",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 4
+    },
+    {
+      "task_id": "TEL_010",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 5,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 4
+    },
+    {
+      "task_id": "TEL_011",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 4
+    },
+    {
+      "task_id": "TEL_012",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 4
+    },
+    {
+      "task_id": "TEL_013",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 4
+    },
+    {
+      "task_id": "TEL_014",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 4
+    },
+    {
+      "task_id": "TEL_015",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 4
+    },
+    {
+      "task_id": "TEL_016",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 4
+    },
+    {
+      "task_id": "TEL_017",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 4
+    },
+    {
+      "task_id": "TEL_018",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 4
+    },
+    {
+      "task_id": "TEL_019",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 2,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 4
+    },
+    {
+      "task_id": "TEL_020",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 4
+    },
+    {
+      "task_id": "TEL_021",
+      "domains": [
+        "telecom"
+      ],
+      "difficulty": 3,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 4
+    },
+    {
+      "task_id": "CD_001",
+      "domains": [
+        "airline",
+        "travel"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 4
+    },
+    {
+      "task_id": "CD_002",
+      "domains": [
+        "retail",
+        "banking"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 4
+    },
+    {
+      "task_id": "CD_003",
+      "domains": [
+        "telecom",
+        "travel"
+      ],
+      "difficulty": 4,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 4
+    },
+    {
+      "task_id": "CD_004",
+      "domains": [
+        "airline",
+        "retail"
+      ],
+      "difficulty": 5,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 4
+    },
+    {
+      "task_id": "CD_005",
+      "domains": [
+        "airline",
+        "telecom",
+        "retail"
+      ],
+      "difficulty": 5,
+      "success": true,
+      "score": 0.9,
+      "steps": 0,
+      "collaboration_score": 0.0,
+      "resource_utilization": 0.0,
+      "execution_time": 0.0,
+      "errors": [],
+      "iteration": 4
+    }
+  ]
+}
