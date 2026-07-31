@@ -1,0 +1,77 @@
+========================================================
+
+🔬 XRM-BrainX v25.2 Statistical Benchmark (N=5 Alternating Trials) on AMD EPYC 7B13
+
+========================================================
+
+🔄 [Trial 1/5] Performing alternating measurements (Idle -> Active)...
+
+↳ Trial 1 Results:
+
+• Idle Power: 11.6791 W
+
+• Active Power: 12.6600 W (Cycles: 109,940,932)
+
+• Net Power: 0.9808 W
+
+• Net Energy Consumption: 89.20 nJ/cycle
+
+🔄 [Trial 2/5] Performing alternating measurements (Idle -> Active)...
+
+↳ Trial 2 Results:
+
+• Idle Power: 11.6678 W
+
+• Active Power: 12.6374 W (Cycles: 109,777,160)
+
+• Net Power: 0.9696 W
+
+• Net Energy Consumption: 88.31 nJ/cycle
+
+🔄 [Trial 3/5] Performing alternating measurements (Idle -> Active)...
+
+↳ Trial 3 Results:
+
+• Idle Power: 11.6676 W
+
+• Active Power: 12.9042 W (Cycles: 108,643,586)
+
+• Net Power: 1.2366 W
+
+• Net Energy Consumption: 113.81 nJ/cycle
+
+🔌 Net Power (Net ΔP): 1.1080 ± 0.1239 W
+
+🎯 Net Energy Consumption per Cycle: 1.019422e-07 ± 1.221222e-08 J/cycle
+
+🔥 Final Published Statistic: 101.94 ± 12.21 nJ/cycle
+
+========================================================
+
+
+
+========================================================
+
+📊 XRM-BrainX v25.2 Intel Core i5-7400 @ 3.00GHz Final Statistics Report (N=5)
+
+========================================================
+
+🖥️ Hardware Platform: Intel Core i5-7400 @ 3.00GHz
+
+⏱️ Single Measurement Window: 10.0 s
+
+💤 Static Power (Idle): 16.8642 ± 0.0524 W
+
+⚡ Active Power: 20.3751 ± 0.3967 W
+
+🔄 Cycles: 63,279,163 ± 1,212,332 cycles
+
+--------------------------------------------------------------------------
+
+🔌 Net Power (Net ΔP): 3.5109 ± 0.3488 W
+
+🎯 Net Energy Consumption per Cycle: 5.550103e-07 ± 5.771501e-08 J/cycle
+
+🔥 Final Published Stats: 555.01 ± 57.72 nJ/cycle
+
+========================================================
